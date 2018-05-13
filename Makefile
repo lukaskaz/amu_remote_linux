@@ -30,7 +30,13 @@ LINKER_SCR=scripts/stm32_flash.ld
 CFLAGS+=-Wl,-T,$(LINKER_SCR)
 
 #archiver options
-ARFLAGS=cr
+ARFLAGS=-cr
+
+#ELF interpreter options
+RELFFLAGS=-aW
+
+#Bin file transformer options
+OCPYFLAGS=-O ihex
 #======================================================================#
 #Libraries
 
@@ -43,7 +49,6 @@ CFLAGS+=-I lib/CMSIS/CM3/CoreSupport/
 #StdPeriph includes
 CFLAGS+=-I $(ST_LIB)/inc/
 CFLAGS+=-I lib/CMSIS/CM3/DeviceSupport/ST/STM32F10x/
-
 
 CFLAGS+=-I src/FreeRTOS
 CFLAGS+=-I src/FreeRTOS/include
@@ -121,7 +126,7 @@ STARTUP=lib/CMSIS/CM3/DeviceSupport/ST/STM32F10x/startup/gcc_ride7/startup_stm32
 build:$(MAP_FILE) $(HEX_IMAGE) 
 
 $(HEX_IMAGE):$(EXECUTABLE) 
-	$(OBJCOPY) -O ihex $^ $@
+	$(OBJCOPY) $(OCPYFLAGS) $^ $@
 
 $(LIBSTM32_OUT): $(LIBSTM32_OBJS)
 	$(AR) $(ARFLAGS) $@ $(LIBSTM32_OBJS)
@@ -130,7 +135,7 @@ $(EXECUTABLE):$(SRC) $(STARTUP) $(LIBSTM32_OUT)
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(MAP_FILE): $(EXECUTABLE)
-	$(READELF) -a $^ > $@
+	$(READELF) $(RELFFLAGS) $^ > $@
 
 test: $(LIBFREEOS_OUT)
 
@@ -161,4 +166,4 @@ gdb:
 gdbtui:
 	arm-none-eabi-gdb -tui -x ../commom/gdb_init.gdb
 #======================================================================
-.PHONY:all clean flash
+.PHONY: build rebuild clean flash

@@ -74,7 +74,7 @@ Symbol table '.symtab' contains 1165 entries:
      9: 20004e00     0 SECTION LOCAL  DEFAULT    9 
     10: 00000000     0 SECTION LOCAL  DEFAULT   10 
     11: 00000000     0 SECTION LOCAL  DEFAULT   11 
-    12: 00000000     0 FILE    LOCAL  DEFAULT  ABS /tmp/ccj00JH0.o
+    12: 00000000     0 FILE    LOCAL  DEFAULT  ABS /tmp/ccpwno2r.o
     13: f108f85f     0 NOTYPE  LOCAL  DEFAULT  ABS BootRAM
     14: 080015fc     0 NOTYPE  LOCAL  DEFAULT    2 $t
     15: 08001608     0 NOTYPE  LOCAL  DEFAULT    2 LoopCopyDataInit
@@ -90,13 +90,13 @@ Symbol table '.symtab' contains 1165 entries:
     25: 08000128     0 NOTYPE  LOCAL  DEFAULT    2 $d
     26: 200006a0     1 NOTYPE  LOCAL  DEFAULT    7 completed.8654
     27: 08006b6c     0 NOTYPE  LOCAL  DEFAULT    5 $d
-    28: 08006b6c     0 OBJECT  LOCAL  DEFAULT    5 __do_global_dtors_aux_fin
+    28: 08006b6c     0 OBJECT  LOCAL  DEFAULT    5 __do_global_dtors_aux_fini_array_entry
     29: 08000134     0 NOTYPE  LOCAL  DEFAULT    2 $t
     30: 08000135     0 FUNC    LOCAL  DEFAULT    2 frame_dummy
     31: 08000144     0 NOTYPE  LOCAL  DEFAULT    2 $d
     32: 200006a4    24 NOTYPE  LOCAL  DEFAULT    7 object.8659
     33: 08006b68     0 NOTYPE  LOCAL  DEFAULT    4 $d
-    34: 08006b68     0 OBJECT  LOCAL  DEFAULT    4 __frame_dummy_init_array_
+    34: 08006b68     0 OBJECT  LOCAL  DEFAULT    4 __frame_dummy_init_array_entry
     35: 200006a0     0 NOTYPE  LOCAL  DEFAULT    7 $d
     36: 00000000     0 FILE    LOCAL  DEFAULT  ABS _arm_addsubdf3.o
     37: 08000150     0 NOTYPE  LOCAL  DEFAULT    2 $t
@@ -310,10 +310,10 @@ Symbol table '.symtab' contains 1165 entries:
    245: 08001c4c     0 NOTYPE  LOCAL  DEFAULT    2 $d
    246: 00000000     0 FILE    LOCAL  DEFAULT  ABS tasks.c
    247: 08001c50     0 NOTYPE  LOCAL  DEFAULT    2 $t
-   248: 08001c51    24 FUNC    LOCAL  DEFAULT    2 prvResetNextTaskUnblockTi
+   248: 08001c51    24 FUNC    LOCAL  DEFAULT    2 prvResetNextTaskUnblockTime.part.1
    249: 08001c60     0 NOTYPE  LOCAL  DEFAULT    2 $d
    250: 08001c68     0 NOTYPE  LOCAL  DEFAULT    2 $t
-   251: 08001c69   140 FUNC    LOCAL  DEFAULT    2 prvAddCurrentTaskToDelaye
+   251: 08001c69   140 FUNC    LOCAL  DEFAULT    2 prvAddCurrentTaskToDelayedList
    252: 08001cd8     0 NOTYPE  LOCAL  DEFAULT    2 $d
    253: 08001cf4     0 NOTYPE  LOCAL  DEFAULT    2 $t
    254: 08001cf5   112 FUNC    LOCAL  DEFAULT    2 vTaskSwitchContext.part.5
@@ -371,7 +371,7 @@ Symbol table '.symtab' contains 1165 entries:
    306: 200007b4     0 NOTYPE  LOCAL  DEFAULT    7 $d
    307: 200007b4     4 OBJECT  LOCAL  DEFAULT    7 uxCurrentNumberOfTasks
    308: 200007b8     0 NOTYPE  LOCAL  DEFAULT    7 $d
-   309: 200007b8     4 OBJECT  LOCAL  DEFAULT    7 uxDeletedTasksWaitingClea
+   309: 200007b8     4 OBJECT  LOCAL  DEFAULT    7 uxDeletedTasksWaitingCleanUp
    310: 200007bc     0 NOTYPE  LOCAL  DEFAULT    7 $d
    311: 200007bc     4 OBJECT  LOCAL  DEFAULT    7 uxPendedTicks
    312: 200007c0     0 NOTYPE  LOCAL  DEFAULT    7 $d
@@ -431,10 +431,10 @@ Symbol table '.symtab' contains 1165 entries:
    366: 08002dec     0 NOTYPE  LOCAL  DEFAULT    2 $t
    367: 00000000     0 FILE    LOCAL  DEFAULT  ABS timers.c
    368: 08002e34     0 NOTYPE  LOCAL  DEFAULT    2 $t
-   369: 08002e35    84 FUNC    LOCAL  DEFAULT    2 prvCheckForValidListAndQu
+   369: 08002e35    84 FUNC    LOCAL  DEFAULT    2 prvCheckForValidListAndQueue
    370: 08002e74     0 NOTYPE  LOCAL  DEFAULT    2 $d
    371: 08002e88     0 NOTYPE  LOCAL  DEFAULT    2 $t
-   372: 08002e89    68 FUNC    LOCAL  DEFAULT    2 prvInsertTimerInActiveLis
+   372: 08002e89    68 FUNC    LOCAL  DEFAULT    2 prvInsertTimerInActiveList
    373: 08002ec4     0 NOTYPE  LOCAL  DEFAULT    2 $d
    374: 08002ecc     0 NOTYPE  LOCAL  DEFAULT    2 $t
    375: 08002ef4     0 NOTYPE  LOCAL  DEFAULT    2 $d
@@ -490,7 +490,7 @@ Symbol table '.symtab' contains 1165 entries:
    425: 0800318c     0 NOTYPE  LOCAL  DEFAULT    2 $d
    426: 00000000     0 FILE    LOCAL  DEFAULT  ABS heap_4.c
    427: 0800330c     0 NOTYPE  LOCAL  DEFAULT    2 $t
-   428: 0800330d    92 FUNC    LOCAL  DEFAULT    2 prvInsertBlockIntoFreeLis
+   428: 0800330d    92 FUNC    LOCAL  DEFAULT    2 prvInsertBlockIntoFreeList
    429: 08003360     0 NOTYPE  LOCAL  DEFAULT    2 $d
    430: 08003368     0 NOTYPE  LOCAL  DEFAULT    2 $t
    431: 0800344c     0 NOTYPE  LOCAL  DEFAULT    2 $d
@@ -505,7 +505,7 @@ Symbol table '.symtab' contains 1165 entries:
    440: 2000448c     0 NOTYPE  LOCAL  DEFAULT    7 $d
    441: 2000448c     4 OBJECT  LOCAL  DEFAULT    7 xFreeBytesRemaining
    442: 20004490     0 NOTYPE  LOCAL  DEFAULT    7 $d
-   443: 20004490     4 OBJECT  LOCAL  DEFAULT    7 xMinimumEverFreeBytesRema
+   443: 20004490     4 OBJECT  LOCAL  DEFAULT    7 xMinimumEverFreeBytesRemaining
    444: 20004494     0 NOTYPE  LOCAL  DEFAULT    7 $d
    445: 20004494     8 OBJECT  LOCAL  DEFAULT    7 xStart
    446: 00000000     0 FILE    LOCAL  DEFAULT  ABS hw_config.c
@@ -806,10 +806,10 @@ Symbol table '.symtab' contains 1165 entries:
    741: 08006934     0 NOTYPE  LOCAL  DEFAULT    2 $d
    742: 08006968     0 NOTYPE  LOCAL  DEFAULT    2 $d
    743: 00000000     0 FILE    LOCAL  DEFAULT  ABS ctype_.c
-   744: 00000000     0 FILE    LOCAL  DEFAULT  ABS /home/lukasz/Desktop/work
+   744: 00000000     0 FILE    LOCAL  DEFAULT  ABS /home/lukasz/Desktop/work/AMU/tools/gcc-arm-none-eabi-7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7-m/crti.o
    745: 08006b4c     0 NOTYPE  LOCAL  DEFAULT    2 $t
    746: 08006b58     0 NOTYPE  LOCAL  DEFAULT    2 $t
-   747: 00000000     0 FILE    LOCAL  DEFAULT  ABS /home/lukasz/Desktop/work
+   747: 00000000     0 FILE    LOCAL  DEFAULT  ABS /home/lukasz/Desktop/work/AMU/tools/gcc-arm-none-eabi-7-2017-q4-major/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7-m/crtn.o
    748: 08006b50     0 NOTYPE  LOCAL  DEFAULT    2 $t
    749: 08006b5c     0 NOTYPE  LOCAL  DEFAULT    2 $t
    750: 00000000     0 FILE    LOCAL  DEFAULT  ABS 
@@ -842,13 +842,13 @@ Symbol table '.symtab' contains 1165 entries:
    777: 08001145    60 FUNC    GLOBAL DEFAULT    2 vSound_configuration
    778: 200006e8     4 OBJECT  GLOBAL DEFAULT    7 xRecMutexI2CSequence
    779: 08003205    20 FUNC    GLOBAL DEFAULT    2 vPortExitCritical
-   780: 08003ce1   140 FUNC    GLOBAL DEFAULT    2 Standard_SetEndPointFeatu
+   780: 08003ce1   140 FUNC    GLOBAL DEFAULT    2 Standard_SetEndPointFeature
    781: 00000200     0 NOTYPE  GLOBAL DEFAULT  ABS STACK_SIZE
    782: 0800046d    90 FUNC    GLOBAL HIDDEN     2 __floatdidf
    783: 080019cd    12 FUNC    GLOBAL DEFAULT    2 GPIO_ReadOutputDataBit
    784: 08004331    56 FUNC    GLOBAL DEFAULT    2 USB_Init
    785: 080049d5    48 FUNC    GLOBAL DEFAULT    2 printf
-   786: 20004500     1 OBJECT  GLOBAL DEFAULT    7 __lock___atexit_recursive
+   786: 20004500     1 OBJECT  GLOBAL DEFAULT    7 __lock___atexit_recursive_mutex
    787: 08000ce9    56 FUNC    GLOBAL DEFAULT    2 TIM1_CC_IRQHandler
    788: 08004779    10 FUNC    GLOBAL DEFAULT    2 ByteSwap
    789: 08004cbf    36 FUNC    GLOBAL DEFAULT    2 __sseek
@@ -856,7 +856,7 @@ Symbol table '.symtab' contains 1165 entries:
    791: 0800484d    96 FUNC    GLOBAL DEFAULT    2 __sinit
    792: 080060c1   164 FUNC    GLOBAL DEFAULT    2 __swbuf_r
    793: 08000ba5     2 FUNC    GLOBAL DEFAULT    2 HardFault_Handler
-   794: 08002ded    70 FUNC    GLOBAL DEFAULT    2 vQueueWaitForMessageRestr
+   794: 08002ded    70 FUNC    GLOBAL DEFAULT    2 vQueueWaitForMessageRestricted
    795: 08004821    44 FUNC    GLOBAL DEFAULT    2 __sfmoreglue
    796: 200044f3     1 OBJECT  GLOBAL DEFAULT    7 Request
    797: 080046c1    28 FUNC    GLOBAL DEFAULT    2 GetEPTxAddr
@@ -875,7 +875,7 @@ Symbol table '.symtab' contains 1165 entries:
    810: 20000430     4 OBJECT  GLOBAL DEFAULT    6 __atexit_recursive_mutex
    811: 080046f9    28 FUNC    GLOBAL DEFAULT    2 SetEPTxCount
    812: 08001335   116 FUNC    GLOBAL DEFAULT    2 vLighting_configuration
-   813: 08003869    16 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_Get_Inte
+   813: 08003869    16 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_Get_Interface_Setting
    814: 20004d30     2 OBJECT  GLOBAL DEFAULT    7 SaveState
    815: 20000740     4 OBJECT  GLOBAL DEFAULT    7 xSemaphRadioPacketReady
    816: 20000744     4 OBJECT  GLOBAL DEFAULT    7 pxCurrentTCB
@@ -887,14 +887,14 @@ Symbol table '.symtab' contains 1165 entries:
    822: 08005945   492 FUNC    GLOBAL DEFAULT    2 _scanf_i
    823: 08006b64     0 NOTYPE  GLOBAL DEFAULT    2 _etext
    824: 200006a0     0 NOTYPE  GLOBAL DEFAULT    7 _sbss
-   825: 08006934    50 OBJECT  GLOBAL DEFAULT    2 Virtual_Com_Port_StringPr
+   825: 08006934    50 OBJECT  GLOBAL DEFAULT    2 Virtual_Com_Port_StringProduct
    826: 08001791    20 FUNC    GLOBAL DEFAULT    2 RCC_SYSCLKConfig
    827: 08001bf9    20 FUNC    GLOBAL DEFAULT    2 ADC_ExternalTrigConvCmd
    828: 08001741    48 FUNC    GLOBAL DEFAULT    2 RCC_WaitForHSEStartUp
    829: 0800455d    50 FUNC    GLOBAL DEFAULT    2 SetEPTxStatus
    830: 08005831    80 FUNC    GLOBAL DEFAULT    2 _vfiscanf_r
    831: 20000484    28 OBJECT  GLOBAL DEFAULT    6 pEpInt_OUT
-   832: 0800244d    24 FUNC    GLOBAL DEFAULT    2 vTaskInternalSetTimeOutSt
+   832: 0800244d    24 FUNC    GLOBAL DEFAULT    2 vTaskInternalSetTimeOutState
    833: 08004eb5    88 FUNC    GLOBAL DEFAULT    2 _getc_r
    834: 080032bd    80 FUNC    GLOBAL DEFAULT    2 xPortStartScheduler
    835: 080049bd    22 FUNC    GLOBAL DEFAULT    2 memcpy
@@ -941,7 +941,7 @@ Symbol table '.symtab' contains 1165 entries:
    876: 20004d28     2 OBJECT  GLOBAL DEFAULT    7 wIstr
    877: 080016b1    24 FUNC    GLOBAL DEFAULT    2 SysTick_CLKSourceConfig
    878: 08001641     2 FUNC    WEAK   DEFAULT    2 TAMPER_IRQHandler
-   879: 08003891     4 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_SetLineC
+   879: 08003891     4 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_SetLineCoding
    880: 08005b31    36 FUNC    GLOBAL DEFAULT    2 _read_r
    881: 080026e9     6 FUNC    GLOBAL DEFAULT    2 vListInitialiseItem
    882: 20004d34     4 OBJECT  GLOBAL DEFAULT    7 pProperty
@@ -954,22 +954,22 @@ Symbol table '.symtab' contains 1165 entries:
    889: 080018b9    24 FUNC    GLOBAL DEFAULT    2 RCC_APB1PeriphClockCmd
    890: 0800015d   630 FUNC    GLOBAL HIDDEN     2 __adddf3
    891: 08006b64     0 NOTYPE  GLOBAL DEFAULT    2 __exidx_start
-   892: 20004508     1 OBJECT  GLOBAL DEFAULT    7 __lock___env_recursive_mu
+   892: 20004508     1 OBJECT  GLOBAL DEFAULT    7 __lock___env_recursive_mutex
    893: 080004c9   596 FUNC    GLOBAL HIDDEN     2 __aeabi_dmul
    894: 20000468    28 OBJECT  GLOBAL DEFAULT    6 pEpInt_IN
    895: 08001009    24 FUNC    GLOBAL DEFAULT    2 _isatty
-   896: 2000450c     1 OBJECT  GLOBAL DEFAULT    7 __lock___sinit_recursive_
+   896: 2000450c     1 OBJECT  GLOBAL DEFAULT    7 __lock___sinit_recursive_mutex
    897: 200044a4     4 OBJECT  GLOBAL DEFAULT    7 USB_Tx_ptr_in
    898: 08006310     4 OBJECT  GLOBAL DEFAULT    2 _global_impure_ptr
    899: 08001025    42 FUNC    GLOBAL DEFAULT    2 _realloc_r
    900: 080035e9    64 FUNC    GLOBAL DEFAULT    2 USB_Send_Data
    901: 08001641     2 FUNC    WEAK   DEFAULT    2 DMA1_Channel4_IRQHandler
-   902: 0800691c    18 OBJECT  GLOBAL DEFAULT    2 Virtual_Com_Port_DeviceDe
+   902: 0800691c    18 OBJECT  GLOBAL DEFAULT    2 Virtual_Com_Port_DeviceDescriptor
    903: 080003d5    30 FUNC    GLOBAL HIDDEN     2 __floatunsidf
    904: 20004d38     1 OBJECT  GLOBAL DEFAULT    7 EPindex
    905: 200006c8    16 OBJECT  GLOBAL DEFAULT    7 distance
    906: 08003369   256 FUNC    GLOBAL DEFAULT    2 pvPortMalloc
-   907: 08006930     4 OBJECT  GLOBAL DEFAULT    2 Virtual_Com_Port_StringLa
+   907: 08006930     4 OBJECT  GLOBAL DEFAULT    2 Virtual_Com_Port_StringLangID
    908: 200004b0    48 OBJECT  GLOBAL DEFAULT    6 Device_Property
    909: 08006b4d     0 FUNC    GLOBAL DEFAULT    2 _init
    910: 08003a51   136 FUNC    GLOBAL DEFAULT    2 Standard_GetStatus
@@ -981,7 +981,7 @@ Symbol table '.symtab' contains 1165 entries:
    916: 08001a69    12 FUNC    GLOBAL DEFAULT    2 EXTI_ClearITPendingBit
    917: 0800208d    12 FUNC    GLOBAL DEFAULT    2 xTaskGetTickCount
    918: 08002961   276 FUNC    GLOBAL DEFAULT    2 xQueueGenericSend
-   919: 08006968    38 OBJECT  GLOBAL DEFAULT    2 Virtual_Com_Port_StringVe
+   919: 08006968    38 OBJECT  GLOBAL DEFAULT    2 Virtual_Com_Port_StringVendor
    920: 080009a1    52 FUNC    GLOBAL DEFAULT    2 __libc_fini_array
    921: 08001641     2 FUNC    WEAK   DEFAULT    2 RTC_IRQHandler
    922: 20004528  2048 OBJECT  GLOBAL DEFAULT    7 USB_Tx_Buffer
@@ -998,7 +998,7 @@ Symbol table '.symtab' contains 1165 entries:
    933: 080025ad   132 FUNC    GLOBAL DEFAULT    2 xTaskPriorityDisinherit
    934: 08004715    68 FUNC    GLOBAL DEFAULT    2 SetEPRxCount
    935: 080018d1    52 FUNC    GLOBAL DEFAULT    2 RCC_GetFlagStatus
-   936: 20004510     1 OBJECT  GLOBAL DEFAULT    7 __lock___malloc_recursive
+   936: 20004510     1 OBJECT  GLOBAL DEFAULT    7 __lock___malloc_recursive_mutex
    937: 08004785    36 FUNC    GLOBAL DEFAULT    2 USB_SIL_Init
    938: 080023d5   120 FUNC    GLOBAL DEFAULT    2 xTaskRemoveFromEventList
    939: 080019d9     4 FUNC    GLOBAL DEFAULT    2 GPIO_SetBits
@@ -1006,19 +1006,19 @@ Symbol table '.symtab' contains 1165 entries:
    941: 08000d21   188 FUNC    GLOBAL DEFAULT    2 TIM4_IRQHandler
    942: 0800015d   630 FUNC    GLOBAL HIDDEN     2 __aeabi_dadd
    943: 080017a5    16 FUNC    GLOBAL DEFAULT    2 RCC_GetSYSCLKSource
-   944: 080037d1    20 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_Status_I
+   944: 080037d1    20 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_Status_In
    945: 08004369   388 FUNC    GLOBAL DEFAULT    2 CTR_LP
    946: 0800045d   106 FUNC    GLOBAL HIDDEN     2 __aeabi_ul2d
    947: 08006990    32 OBJECT  GLOBAL DEFAULT    2 __sf_fake_stderr
    948: 08001641     2 FUNC    WEAK   DEFAULT    2 I2C1_EV_IRQHandler
    949: 20004d64     2 OBJECT  GLOBAL DEFAULT    7 SaveTState
-   950: 08003845    36 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_NoData_S
-   951: 080009d9     2 FUNC    GLOBAL DEFAULT    2 __retarget_lock_release_r
+   950: 08003845    36 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_NoData_Setup
+   951: 080009d9     2 FUNC    GLOBAL DEFAULT    2 __retarget_lock_release_recursive
    952: 200006c0     4 OBJECT  GLOBAL DEFAULT    7 xSemaphLedSignal
    953: 08004531    16 FUNC    GLOBAL DEFAULT    2 SetBTABLE
    954: 08001bad    22 FUNC    GLOBAL DEFAULT    2 TIM_GetITStatus
    955: 08001811   144 FUNC    GLOBAL DEFAULT    2 RCC_GetClocksFreq
-   956: 080026b9    24 FUNC    GLOBAL DEFAULT    2 pvTaskIncrementMutexHeldC
+   956: 080026b9    24 FUNC    GLOBAL DEFAULT    2 pvTaskIncrementMutexHeldCount
    957: 00000000     0 NOTYPE  GLOBAL DEFAULT  ABS HEAP_SIZE
    958: 2000449c     1 OBJECT  GLOBAL DEFAULT    7 USB_Tx_State
    959: 200044a8     4 OBJECT  GLOBAL DEFAULT    7 USB_Tx_ptr_out
@@ -1027,7 +1027,7 @@ Symbol table '.symtab' contains 1165 entries:
    962: 08001be1    24 FUNC    GLOBAL DEFAULT    2 FLASH_PrefetchBufferCmd
    963: 08005033    36 FUNC    GLOBAL DEFAULT    2 __sfputs_r
    964: 080062cd    28 FUNC    GLOBAL DEFAULT    2 memchr
-   965: 2000044c    26 OBJECT  GLOBAL DEFAULT    6 Virtual_Com_Port_StringSe
+   965: 2000044c    26 OBJECT  GLOBAL DEFAULT    6 Virtual_Com_Port_StringSerial
    966: 08002465   112 FUNC    GLOBAL DEFAULT    2 xTaskCheckForTimeOut
    967: 20004d6c     0 NOTYPE  GLOBAL DEFAULT    7 __bss_end__
    968: 08001059     6 FUNC    GLOBAL DEFAULT    2 _free_r
@@ -1051,14 +1051,14 @@ Symbol table '.symtab' contains 1165 entries:
    986: 08001641     2 FUNC    WEAK   DEFAULT    2 EXTI15_10_IRQHandler
    987: 080009dd   192 FUNC    GLOBAL DEFAULT    2 __register_exitproc
    988: 200006be     1 OBJECT  GLOBAL DEFAULT    7 uart_data_sent
-   989: 080037ad    24 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_SetConfi
+   989: 080037ad    24 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_SetConfiguration
    990: 080042ed    64 FUNC    GLOBAL DEFAULT    2 SetDeviceAddress
    991: 0800450d    34 FUNC    GLOBAL DEFAULT    2 PMAToUserBufferCopy
    992: 0800236d    28 FUNC    GLOBAL DEFAULT    2 vTaskSwitchContext
    993: 080046a1    32 FUNC    GLOBAL DEFAULT    2 SetEPRxAddr
    994: 08005f49    36 FUNC    GLOBAL DEFAULT    2 _strtoul_r
    995: 08003555   148 FUNC    GLOBAL DEFAULT    2 Handle_USBAsynchXfer
-   996: 080023a9    44 FUNC    GLOBAL DEFAULT    2 vTaskPlaceOnEventListRest
+   996: 080023a9    44 FUNC    GLOBAL DEFAULT    2 vTaskPlaceOnEventListRestricted
    997: 080019dd     4 FUNC    GLOBAL DEFAULT    2 GPIO_ResetBits
    998: 200044f2     1 OBJECT  GLOBAL DEFAULT    7 bIntPackSOF
    999: 08004d11    32 FUNC    GLOBAL DEFAULT    2 _close_r
@@ -1068,7 +1068,7 @@ Symbol table '.symtab' contains 1165 entries:
   1003: 08001b21   108 FUNC    GLOBAL DEFAULT    2 TIM_OC4Init
   1004: 08002f05    88 FUNC    GLOBAL DEFAULT    2 xTimerGenericCommand
   1005: 08006165   220 FUNC    GLOBAL DEFAULT    2 __swsetup_r
-  1006: 08000fe5    16 FUNC    GLOBAL DEFAULT    2 vApplicationStackOverflow
+  1006: 08000fe5    16 FUNC    GLOBAL DEFAULT    2 vApplicationStackOverflowHook
   1007: 08001641     2 FUNC    WEAK   DEFAULT    2 EXTI9_5_IRQHandler
   1008: 0800071d   464 FUNC    GLOBAL HIDDEN     2 __divdf3
   1009: 080048ad   120 FUNC    GLOBAL DEFAULT    2 __sfp
@@ -1082,7 +1082,7 @@ Symbol table '.symtab' contains 1165 entries:
   1017: 08001a4d    28 FUNC    GLOBAL DEFAULT    2 EXTI_GetITStatus
   1018: 08001641     2 FUNC    WEAK   DEFAULT    2 SPI2_IRQHandler
   1019: 080069b0    32 OBJECT  GLOBAL DEFAULT    2 __sf_fake_stdin
-  1020: 080009d5     2 FUNC    GLOBAL DEFAULT    2 __retarget_lock_acquire_r
+  1020: 080009d5     2 FUNC    GLOBAL DEFAULT    2 __retarget_lock_acquire_recursive
   1021: 08001bcd    20 FUNC    GLOBAL DEFAULT    2 FLASH_SetLatency
   1022: 080008ed   148 FUNC    GLOBAL DEFAULT    2 memset
   1023: 08000ba9     2 FUNC    GLOBAL DEFAULT    2 MemManage_Handler
@@ -1092,11 +1092,11 @@ Symbol table '.symtab' contains 1165 entries:
   1027: 200006d8     1 OBJECT  GLOBAL DEFAULT    7 sensorInUse
   1028: 080031c1    36 FUNC    GLOBAL DEFAULT    2 SVC_Handler
   1029: 08004ce3     8 FUNC    GLOBAL DEFAULT    2 __sclose
-  1030: 08003879    24 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_GetLineC
+  1030: 08003879    24 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_GetLineCoding
   1031: 08002ecd    56 FUNC    GLOBAL DEFAULT    2 xTimerCreateTimerTask
   1032: 08005e31    36 FUNC    GLOBAL DEFAULT    2 _strtol_r
   1033: 08004999    36 FUNC    GLOBAL DEFAULT    2 getchar
-  1034: 080037c5    12 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_SetDevic
+  1034: 080037c5    12 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_SetDeviceAddress
   1035: 08001051     6 FUNC    GLOBAL DEFAULT    2 _malloc_r
   1036: 080062e9    26 FUNC    GLOBAL DEFAULT    2 __ascii_wctomb
   1037: 0800046d    90 FUNC    GLOBAL HIDDEN     2 __aeabi_l2d
@@ -1110,19 +1110,19 @@ Symbol table '.symtab' contains 1165 entries:
   1045: 080017f1    12 FUNC    GLOBAL DEFAULT    2 RCC_USBCLKConfig
   1046: 08001641     2 FUNC    WEAK   DEFAULT    2 EXTI4_IRQHandler
   1047: 08002919    70 FUNC    GLOBAL DEFAULT    2 xQueueGenericCreate
-  1048: 08000bb9    60 FUNC    GLOBAL DEFAULT    2 USB_LP_CAN1_RX0_IRQHandle
+  1048: 08000bb9    60 FUNC    GLOBAL DEFAULT    2 USB_LP_CAN1_RX0_IRQHandler
   1049: 080017dd    20 FUNC    GLOBAL DEFAULT    2 RCC_PCLK2Config
   1050: 08001c21     8 FUNC    GLOBAL DEFAULT    2 USART_ClearFlag
   1051: 200006e0     4 OBJECT  GLOBAL DEFAULT    7 xQueueDriveControlCmd
   1052: 08000a9d   260 FUNC    GLOBAL DEFAULT    2 SystemInit
   1053: 08006b59     0 FUNC    GLOBAL DEFAULT    2 _fini
   1054: 080049d5    48 FUNC    GLOBAL DEFAULT    2 iprintf
-  1055: 080037e9    92 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_Data_Set
+  1055: 080037e9    92 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_Data_Setup
   1056: 080021d5   268 FUNC    GLOBAL DEFAULT    2 xTaskResumeAll
   1057: 08005591   672 FUNC    GLOBAL DEFAULT    2 __svfiscanf_r
   1058: 08001641     2 FUNC    WEAK   DEFAULT    2 USB_HP_CAN1_TX_IRQHandler
   1059: 08002001   124 FUNC    GLOBAL DEFAULT    2 vTaskStartScheduler
-  1060: 080039b1    32 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_GetStrin
+  1060: 080039b1    32 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_GetStringDescriptor
   1061: 080016c9    64 FUNC    GLOBAL DEFAULT    2 RCC_DeInit
   1062: 08000995    12 FUNC    GLOBAL DEFAULT    2 atexit
   1063: 08004ced    36 FUNC    GLOBAL DEFAULT    2 _write_r
@@ -1134,7 +1134,7 @@ Symbol table '.symtab' contains 1165 entries:
   1069: 20000000     4 OBJECT  GLOBAL DEFAULT    6 _impure_ptr
   1070: 08001641     2 FUNC    WEAK   DEFAULT    2 TIM1_UP_IRQHandler
   1071: 08004d31   268 FUNC    GLOBAL DEFAULT    2 __sflush_r
-  1072: 08003d6d    28 FUNC    GLOBAL DEFAULT    2 Standard_GetDescriptorDat
+  1072: 08003d6d    28 FUNC    GLOBAL DEFAULT    2 Standard_GetDescriptorData
   1073: 08004139   268 FUNC    GLOBAL DEFAULT    2 Out0_Process
   1074: 08005b69   280 FUNC    GLOBAL DEFAULT    2 __srefill_r
   1075: 08001641     2 FUNC    WEAK   DEFAULT    2 WWDG_IRQHandler
@@ -1154,9 +1154,9 @@ Symbol table '.symtab' contains 1165 entries:
   1089: 080014ed    60 FUNC    GLOBAL DEFAULT    2 _write
   1090: 200044f8     1 OBJECT  GLOBAL DEFAULT    7 Data_Mul_MaxPacketSize
   1091: 2000069c     0 NOTYPE  GLOBAL DEFAULT    6 _edata
-  1092: 080039a5    12 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_GetConfi
+  1092: 080039a5    12 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_GetConfigDescriptor
   1093: 08003d89    68 FUNC    GLOBAL DEFAULT    2 Post0_Process
-  1094: 20004514     1 OBJECT  GLOBAL DEFAULT    7 __lock___at_quick_exit_mu
+  1094: 20004514     1 OBJECT  GLOBAL DEFAULT    7 __lock___at_quick_exit_mutex
   1095: 08001a75   172 FUNC    GLOBAL DEFAULT    2 TIM_TimeBaseInit
   1096: 08001641     2 FUNC    WEAK   DEFAULT    2 RTCAlarm_IRQHandler
   1097: 0800372d   128 FUNC    GLOBAL DEFAULT    2 USB_Istr
@@ -1165,7 +1165,7 @@ Symbol table '.symtab' contains 1165 entries:
   1100: 08001ddd   548 FUNC    GLOBAL DEFAULT    2 xTaskCreate
   1101: 08004591    50 FUNC    GLOBAL DEFAULT    2 SetEPRxStatus
   1102: 080034e5    60 FUNC    GLOBAL DEFAULT    2 Set_System
-  1103: 080068d8    67 OBJECT  GLOBAL DEFAULT    2 Virtual_Com_Port_ConfigDe
+  1103: 080068d8    67 OBJECT  GLOBAL DEFAULT    2 Virtual_Com_Port_ConfigDescriptor
   1104: 20004e00     0 NOTYPE  GLOBAL DEFAULT  ABS __StackLimit
   1105: 08001641     2 FUNC    WEAK   DEFAULT    2 USART2_IRQHandler
   1106: 08004c87    56 FUNC    GLOBAL DEFAULT    2 __swrite
@@ -1184,7 +1184,7 @@ Symbol table '.symtab' contains 1165 entries:
   1119: 08005cd9    98 FUNC    GLOBAL DEFAULT    2 __sccl
   1120: 080024e1    32 FUNC    GLOBAL DEFAULT    2 xTaskGetSchedulerState
   1121: 08006a48   257 OBJECT  GLOBAL DEFAULT    2 _ctype_
-  1122: 08002631   136 FUNC    GLOBAL DEFAULT    2 vTaskPriorityDisinheritAf
+  1122: 08002631   136 FUNC    GLOBAL DEFAULT    2 vTaskPriorityDisinheritAfterTimeout
   1123: 08001529   100 FUNC    GLOBAL DEFAULT    2 _read
   1124: 200004a0     8 OBJECT  GLOBAL DEFAULT    6 Config_Descriptor
   1125: 08004635     4 FUNC    GLOBAL DEFAULT    2 Clear_Status_Out
@@ -1197,7 +1197,7 @@ Symbol table '.symtab' contains 1165 entries:
   1132: 08004f79   128 FUNC    GLOBAL DEFAULT    2 __smakebuf_r
   1133: 08003539    24 FUNC    GLOBAL DEFAULT    2 USB_Cable_Config
   1134: 2000451c     1 OBJECT  GLOBAL DEFAULT    7 __lock___tz_mutex
-  1135: 080037e5     2 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_Status_O
+  1135: 080037e5     2 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_Status_Out
   1136: 08003191    36 FUNC    GLOBAL DEFAULT    2 pxPortInitialiseStack
   1137: 0800536d   548 FUNC    GLOBAL DEFAULT    2 _printf_i
   1138: 08006285     6 FUNC    GLOBAL DEFAULT    2 __locale_ctype_ptr_l
@@ -1206,9 +1206,9 @@ Symbol table '.symtab' contains 1165 entries:
   1141: 200044f4     4 OBJECT  GLOBAL DEFAULT    7 bDeviceState
   1142: 08000419    66 FUNC    GLOBAL HIDDEN     2 __aeabi_f2d
   1143: 080031e5    32 FUNC    GLOBAL DEFAULT    2 vPortEnterCritical
-  1144: 080015d5    40 FUNC    GLOBAL DEFAULT    2 is_radio_data_checksum_co
+  1144: 080015d5    40 FUNC    GLOBAL DEFAULT    2 is_radio_data_checksum_correct
   1145: 200004e0     2 OBJECT  GLOBAL DEFAULT    6 Device_Table
-  1146: 08003999    12 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_GetDevic
+  1146: 08003999    12 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_GetDeviceDescriptor
   1147: 08000159   634 FUNC    GLOBAL HIDDEN     2 __subdf3
   1148: 08005059   552 FUNC    GLOBAL DEFAULT    2 _vfprintf_r
   1149: 080038b9   224 FUNC    GLOBAL DEFAULT    2 Virtual_Com_Port_Reset
@@ -1224,7 +1224,7 @@ Symbol table '.symtab' contains 1165 entries:
   1159: 20000530   364 OBJECT  GLOBAL DEFAULT    6 __global_locale
   1160: 08001641     2 FUNC    WEAK   DEFAULT    2 USBWakeUp_IRQHandler
   1161: 080017b5    20 FUNC    GLOBAL DEFAULT    2 RCC_HCLKConfig
-  1162: 20004520     1 OBJECT  GLOBAL DEFAULT    7 __lock___sfp_recursive_mu
+  1162: 20004520     1 OBJECT  GLOBAL DEFAULT    7 __lock___sfp_recursive_mutex
   1163: 08002b05    96 FUNC    GLOBAL DEFAULT    2 xQueueGiveFromISR
   1164: 08000ff5     6 FUNC    GLOBAL DEFAULT    2 _close
 
