@@ -36,6 +36,7 @@
 
 typedef enum
 {
+    MENU_MAIN_CALL = 0x1B,
     MENU_MAIN = '0',
     MENU_MOVEMENT,
     MENU_LIGHTING,
@@ -67,50 +68,42 @@ typedef enum
 * Return         : None
 * Attention		 : None
 *******************************************************************************/
+#define CON_IS_MAIN_MENU_NEEDED(submenu)  ((submenu) != MENU_MAIN && (submenu) != MENU_MAIN_CALL)
 void vConsoleInterfaceTask(void * pvArg)
 {
-    menuLevel_t menuLevel = MENU_MAIN, menuLevelSel = MENU_MAIN;
-
     setvbuf(stdin, NULL, _IONBF, 0);
 //    setvbuf(stdout, NULL, _IONBF, 0);
 //    setvbuf(stderr, NULL, _IONBF, 0);
 
 //    setbuf(stdin, NULL);
 //    setbuf(stdout, NULL);
+    //vTaskDelay(250);
 
     while(1) {
-        //if(menuLevel != menuLevelSel || getchar()  == 0x1B )
-        if(menuLevel != menuLevelSel || getchar()  == 0x1B)
-        {
-            menuLevel = menuLevelSel;
-            switch(menuLevel) {
-                case MENU_MAIN:
-                    printf(MAIN_CONSOLE_MENU_TEXT);
+        static menuLevel_t submenu = MENU_MAIN;
 
-                    //vTaskDelay(250);
-                    menuLevelSel = (menuLevel_t)getchar();
-                    menuLevelSel = (menuLevelSel == MENU_MAIN) ? (-1) : menuLevelSel;
-                    break;
-                case MENU_MOVEMENT:
-                    vDrive_Console();
-
-                    menuLevelSel = MENU_MAIN;
-                    break;
-                case MENU_LIGHTING: {
-                    vLighting_Console();
-
-                    menuLevelSel = MENU_MAIN;
-                    break;
-                }
-                case MENU_SOUND:
-                    vSound_Signal_Console();
-
-                    menuLevelSel = MENU_MAIN;
-                    break;
-                default:
-                    printf("selected menu not supported!\n\r");
-                    menuLevelSel = MENU_MAIN;
-                    break;
+        submenu = (CON_IS_MAIN_MENU_NEEDED(submenu) == true) ? MENU_MAIN :  getchar();
+        switch(submenu) {
+            case MENU_MAIN_CALL:
+            case MENU_MAIN: {
+                printf(MAIN_CONSOLE_MENU_TEXT);
+                break;
+            }
+            case MENU_MOVEMENT: {
+                vDrive_Console();
+                break;
+            }
+            case MENU_LIGHTING: {
+                vLighting_Console();
+                break;
+            }
+            case MENU_SOUND: {
+                vSound_Signal_Console();
+                break;
+            }
+            default: {
+                printf("selected menu not supported!\n\r");
+                break;
             }
         }
     }

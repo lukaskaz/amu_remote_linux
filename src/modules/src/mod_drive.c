@@ -127,7 +127,7 @@ void vDrive_Console(void)
         selection = getchar();
         switch(selection) {
             case '0':
-                printf("\Exiting menu %s\n\r", __func__);
+                printf("\n\rExiting menu %s\n\r", __func__);
                 break;
             case '1':
                 driveControlData.direction = DRIVE_OP_FORWARD;
