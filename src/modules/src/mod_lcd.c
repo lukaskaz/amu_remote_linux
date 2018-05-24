@@ -80,11 +80,11 @@ static bool lcdClearScreen   = false;
 xQueueHandle xQueueLcdControl = NULL;
 
 
-static void vLCD_Configuration(void);
+//static void vLCD_Configuration(void);
 
 static int ZtScI2cMxReset(void);
 static int ZtScI2cMxSetAddress(void);
-static int ZtScI2cMxReadState(void);
+static int ZtScI2cMxReadState(uint8_t* state);
 static int ZtScI2cMxReadVersion(uint8_t * vbuff);
 static int ZtScI2cMxDisplay8x16Str(uint8_t page, uint8_t column, const char *str);
 static int ZtScI2cMxFillArea(uint8_t spage, uint8_t epage, uint8_t scolumn, uint8_t ecolumn, uint8_t filldata);
@@ -96,6 +96,30 @@ static int ZtScI2cMxDeactivateScroll(void);
 static int ZtScI2cMxSetLocation(uint8_t page, uint8_t column);
 
 
+static bool ZtScI2cMxWaitLcdReady(void)
+{
+    bool fresult = false;
+    int counter = 1000;
+    uint8_t status = 0xFF;
+
+    while(1) {
+        ZtScI2cMxReadState(&status);
+        if(status == 0x00) {
+            fresult = true;
+            break;
+        }
+        else if(counter == 0) {
+            break;
+        }
+        else {
+            counter--;
+            vTaskDelay(1);
+        }
+    }
+
+    return fresult;
+}
+
 static int ZtScI2cMxReset(void)
 {
     uint8_t addr = 0;
@@ -104,6 +128,8 @@ static int ZtScI2cMxReset(void)
     addr = ZTSCI2CMX_ADDRESS;
     buff[0] =  REG_RESET;
     buff[1] =  RESET_OLED;
+
+
     return xI2C_write_sequence(addr, buff, 2);
 }
 
@@ -118,29 +144,38 @@ static int ZtScI2cMxSetAddress(void)
     return xI2C_write_sequence(ZTSCI2CMX_DADDRESS, buff, 2);
 }
 
-static int ZtScI2cMxReadState(void)
-{
-    uint8_t addr = 0;
-    uint8_t reg[2] = {0};
 
-    addr = ZTSCI2CMX_ADDRESS;
-    reg[0] = REG_STATUS;
-    xI2C_read_sequence(addr, reg, 1, &reg[1], 1);
-    return reg[1];
+static int ZtScI2cMxReadState(uint8_t* state)
+{
+    static I2cParams_t params =
+    {
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_STATUS,
+        .data = NULL,
+        .dataSize = 1,
+    };
+
+    params.data = state;
+    return xI2C_read_sequence(&params);
 }
 
 static int ZtScI2cMxReadVersion(uint8_t* vbuff)
 {
-    uint8_t addr = 0;
-    uint8_t reg[1] = {0};
+    static I2cParams_t params =
+    {
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_VERSION,
+        .data = NULL,
+        .dataSize = 16,
+    };
 
-    addr = ZTSCI2CMX_ADDRESS;
-    reg[0] = REG_VERSION;
-    return xI2C_read_sequence(addr, reg, 1, vbuff, 16);
+    params.data = vbuff;
+    return xI2C_read_sequence(&params);
 }
 
 static int ZtScI2cMxDisplay8x16Str(uint8_t page, uint8_t column, const char *str)
 {
+    int fresult = 0;
     uint8_t addr = 0;
     uint8_t buff[19] = {0};
     uint8_t i = 0;
@@ -156,6 +191,8 @@ static int ZtScI2cMxDisplay8x16Str(uint8_t page, uint8_t column, const char *str
        buff[i+3] = (uint8_t)*str++;
        i++;
     }
+
+    ZtScI2cMxWaitLcdReady();
     return xI2C_write_sequence(addr, buff, i+3);
 }
 
@@ -171,6 +208,8 @@ static int ZtScI2cMxFillArea(uint8_t spage, uint8_t epage, uint8_t scolumn, uint
     buff[3] = scolumn;
     buff[4] = ecolumn;
     buff[5] = filldata;
+
+    ZtScI2cMxWaitLcdReady();
     return xI2C_write_sequence(addr, buff, 6);
 }
 
@@ -294,6 +333,8 @@ static int ZtScI2cMxSetBrightness(uint8_t val)
     addr = ZTSCI2CMX_ADDRESS;
     buff[0] =  REG_BRIGHTNESS;
     buff[1] =  val;
+
+    ZtScI2cMxWaitLcdReady();
     return xI2C_write_sequence(addr, buff, 2);
 }
 
@@ -315,50 +356,34 @@ static int ZtScI2cMxSetVcomH(uint8_t val)
     addr = ZTSCI2CMX_ADDRESS;
     buff[0] =  REG_VCOMH;
     buff[1] =  val;
+
+    ZtScI2cMxWaitLcdReady();
     return xI2C_write_sequence(addr, buff, 2);
 }
 
 static void ZtScI2cMxDisplayArea(uint8_t spage, uint8_t epage, uint8_t scolumn, uint8_t ecolumn, const char *pt)
 {
-    uint8_t j = 0;
-    uint8_t h = 0;
-    uint8_t w = 0;
-    uint16_t cnt = 0;
-    uint8_t addr = 0;
-    uint8_t buff[32] = {0};
+    static I2cParams_t params =
+    {
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_DAT,
+        .data = NULL,
+        .dataSize = 0,
+    };
 
-    if(xSemaphoreTakeRecursive(xRecMutexI2CSequence, portMAX_DELAY) == pdTRUE) {
-        addr = ZTSCI2CMX_ADDRESS;
-        buff[0] = REG_DAT;
+    uint8_t i = 0;
+    uint8_t height = epage - spage;
+    uint8_t width = ecolumn - scolumn;
 
-        h = epage - spage;
-        w = ecolumn - scolumn;
-        while ( j<h ) {
-            uint8_t p = w;
-            ZtScI2cMxSetLocation(spage + j, scolumn);
+    ZtScI2cMxWaitLcdReady();
+    for(i=0; i < height; i++) {
+        ZtScI2cMxSetLocation(spage + i, scolumn);
 
-            while(p) {
-                if(p>=31) {
-                    uint8_t n = 0;
-                    for (n=0; n<31; n++) {
-                        buff[1+n] = pt[cnt++];
-                    }
-                    xI2C_write_sequence(addr, buff, 32);
-                    p -= 31;
-                }
-                else {
-                    int n;
-                    for (n=0; n<p; n++) {
-                        buff[1+n] = pt[cnt++];
-                    }
-                    xI2C_write_sequence(addr, buff, n+1);
-                    p -= n;
-                }
-            }
-            j++;
-        }
+        params.data = pt;
+        params.dataSize = width;
+        pt += width;
 
-        xSemaphoreGiveRecursive(xRecMutexI2CSequence);
+        xI2C_write_sequence1(&params);
     }
 }
 
@@ -387,10 +412,32 @@ void vLcdInterfaceTask(void * pvArg)
     vLCD_Configuration();
     xQueueLcdControl = xQueueCreate(LCD_DATA_QUEUE_SIZE, sizeof(lcdControlData_t));
 
-    ZtScI2cMxDisplay8x16Str(2, 0, ">AMUv2 prototype");
-    ZtScI2cMxDisplay8x16Str(4, 0, "   Welcome :)   ");
+//    vTaskDelay(1000);
+//    while(1) {
+//        char ver1[20] = {0};
+//
+//        ZtScI2cMxReadVersion(ver1);
+//        vTaskDelay(1500);
+//    }
 
-    xLcdScrSaverTimer = xTimerCreate((signed char *)"Lcd SS timer", 10000, pdFALSE, (void *)4, vLcdScrSaverCallback);
+    ZtScI2cMxDisplay8x16Str(2, 0, ">AMUv2 prototype");
+    //vTaskDelay(10);
+
+    int welcomeCnt = 0;
+    while(1) {
+        ZtScI2cMxDisplay8x16Str(4, 0, "   Welcome :)   ");
+        if(++welcomeCnt > 2) {
+            break;
+        }
+        else {
+            vTaskDelay(1000);
+            ZtScI2cMxDisplay8x16Str(4, 0, "           ;)   ");
+            vTaskDelay(1000);
+        }
+    }
+
+
+    xLcdScrSaverTimer = xTimerCreate((signed char *)"Lcd SS timer", 2000, pdFALSE, (void *)4, vLcdScrSaverCallback);
     xLcdClearScreenTimer = xTimerCreate((signed char *)"Lcd clear screen timer", 3000, pdFALSE, (void *)5, vLcdClearScrCallback);
     xTimerStart(xLcdScrSaverTimer, 0);
     
@@ -482,13 +529,44 @@ void vLcdInterfaceTask(void * pvArg)
             char text[20+1] = {0};
 
             snprintf(text, 20, "Front: %.2f", distance[SENSOR_FRONT]);
-            ZtScI2cMxDisplay8x16Str(3, 0, text);
+            //ZtScI2cMxDisplay8x16Str(3, 0, text);
         }
 
         if(lcdStartScrSaver == true) {
+            static int robotNb = 1;
+
             lcdStartScrSaver = false;
-            ZtScI2cMxDisplayArea(0, 8, 0, 128, robot);
-            
+            xTimerStart(xLcdScrSaverTimer, 0);
+
+            if(welcomeCnt) {
+                welcomeCnt = 0;
+                ZtScI2cMxClearScreen();
+
+                int i = 0;
+                for(i = 0; i < 10; i++) {
+                    uint8_t state = 0xFF;
+                    ZtScI2cMxReadState(&state);
+                    printf("[%s] state: %#x\n", __func__, state);
+                    vTaskDelay(1);
+                }
+
+                //vTaskDelay(10);
+                char ver[50] = {0};
+                ZtScI2cMxReadVersion(ver);
+                printf("[%s] version: %s\n", __func__, ver);
+
+                //vTaskDelay(10);
+            }
+
+            if(robotNb == 1) {
+                ZtScI2cMxDisplayArea(0, 8, 0, 64, robot_3);
+                robotNb = 2;
+            }
+            else {
+                ZtScI2cMxDisplayArea(0, 8, 0, 64, robot_4);
+                robotNb = 1;
+            }
+
             switch(get_battery_status()) {
                 case SEN_BAT_FULL:
                     ZtScI2cMxDisplayArea(0, 2, 104, 128, battery_full);
@@ -513,16 +591,26 @@ void vLcdInterfaceTask(void * pvArg)
     }
 }
 
-static void vLCD_Configuration(void)
+void vLCD_Startup(void)
 {
-    // LCD initialisation sequence should be the first on I2C line and I2C line 
+    // LCD initialization sequence should be the first on I2C line and I2C line
     // should be released for some time to prevent demo mode from being started
     ZtScI2cMxReset();
+
+    //vTaskDelay(10);
+    //xSemaphoreGive(xSemaphI2CLcdInitDone);
+}
+void vLCD_Configuration(void)
+{
+    // LCD initialization sequence should be the first on I2C line and I2C line
+    // should be released for some time to prevent demo mode from being started
+
+    vTaskDelay(10);
     ZtScI2cMxSetBrightness(0xFF);
     ZtScI2cMxSetVcomH(7);
     
-    vTaskDelay(10);
-    xSemaphoreGive(xSemaphI2CLcdInitDone);
+    //vTaskDelay(10);
+    //xSemaphoreGive(xSemaphI2CLcdInitDone);
 }
 
 

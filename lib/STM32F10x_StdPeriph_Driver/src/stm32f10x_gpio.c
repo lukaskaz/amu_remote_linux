@@ -257,6 +257,49 @@ void GPIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef* GPIO_InitStruct)
   }
 }
 
+
+void GPIO_ChgSinglePinMode(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef* GPIO_InitStruct)
+{
+  uint32_t currentmode = 0x00, tmpreg = 0x00, pinmask = 0x00;
+  uint32_t brr_reg = 0x00, bsrr_reg = 0x00;
+
+//  currentmode = ((uint32_t)GPIO_InitStruct->GPIO_Mode) & ((uint32_t)0x0F);
+//  currentmode |= (uint32_t)GPIO_InitStruct->GPIO_Speed;
+
+  currentmode = ((uint32_t)GPIO_InitStruct->GPIO_Mode) & ((uint32_t)0x0F);
+  if ((((uint32_t)GPIO_InitStruct->GPIO_Mode) & ((uint32_t)0x10)) != 0x00)
+  {
+    currentmode |= (uint32_t)GPIO_InitStruct->GPIO_Speed;
+  }
+
+  switch(GPIO_InitStruct->GPIO_Pin) {
+    case GPIO_Pin_1:
+      currentmode <<= 4;
+      pinmask = 0xFFFFFF0F;
+      brr_reg = 0x02;
+      bsrr_reg = 0x02;
+      break;
+
+    default:
+      break;
+  }
+
+  switch(GPIO_InitStruct->GPIO_Mode) {
+    case GPIO_Mode_IPD:
+      GPIOx->BRR = brr_reg;
+      break;
+    case GPIO_Mode_IPU:
+      GPIOx->BSRR = bsrr_reg;
+      break;
+    default:
+      break;
+  }
+
+  tmpreg = GPIOx->CRL & pinmask;
+  tmpreg |= currentmode;
+  GPIOx->CRL = tmpreg;
+}
+
 /**
   * @brief  Fills each GPIO_InitStruct member with its default value.
   * @param  GPIO_InitStruct : pointer to a GPIO_InitTypeDef structure which will

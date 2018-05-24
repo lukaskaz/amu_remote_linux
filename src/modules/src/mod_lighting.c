@@ -56,7 +56,7 @@ static lightMode_t currentLightMode = LIGHT_MODE_AUTO;
 
 static void resetLightingToDefaults(void);
 static void adjustLightingMode(void);
-static void vLighting_Control(const uint8_t state);
+static void vLighting_Control(uint8_t state);
 
 static void resetLightingToDefaults(void)
 {
@@ -126,69 +126,80 @@ void vLighting_configuration(void)
     GPIO_SetBits(GPIOB, GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5);
 }
 
+#define LIGHTING_MENU_TEXT  "\n\r"                              \
+                            "--------------------------\n\r"    \
+                            "|    SOUND SIGNAL MENU   |\n\r"    \
+                            "--------------------------\n\r"    \
+                            "| 1. switch left led     |\n\r"    \
+                            "| 2. switch right led    |\n\r"    \
+                            "| 3. switch inner leds   |\n\r"    \
+                            "| 4. switch outer leds   |\n\r"    \
+                            "|                        |\n\r"    \
+                            "| 0. back to main menu   |\n\r"    \
+                            "--------------------------\n\r"
+
+#define PROMPT              " Selection/> "
+
+
 void vLighting_Console(void)
 {
     char selection = 0;
 
-    printf("\n\r"
-           "--------------------------\n\r"
-           "|    SOUND SIGNAL MENU   |\n\r"
-           "--------------------------\n\r"
-           "| 1. switch left led     |\n\r"
-           "| 2. switch right led    |\n\r"
-           "| 3. switch inner leds   |\n\r"
-           "| 4. switch outer leds   |\n\r"
-           "|                        |\n\r"
-           "| 0. back to main menu   |\n\r"
-           "--------------------------\n\r"
-           " Selection/> ");
-
+    printf(LIGHTING_MENU_TEXT);
     do {
-        //GPIO_ResetBits(GPIOC, GPIO_Pin_13);
         selection = getchar();
 
         vLighting_Control(selection);
-
     } while(selection != '0');
 }
 
-static void vLighting_Control(const uint8_t state)
+
+#define LIGHTING_CHANGE_LEDS_STATE(data)    do {                                                                \
+                                                if(GPIO_ReadOutputDataBit(data.port, data.pin) == Bit_SET) {    \
+                                                    GPIO_ResetBits(data.port, data.pin);                        \
+                                                }                                                               \
+                                                else {                                                          \
+                                                    GPIO_SetBits(data.port, data.pin);                          \
+                                                }                                                               \
+                                            } while(0);
+
+static void vLighting_Control(uint8_t state)
 {
+    enum { LIGHT_LEFT = 0, LIGHT_RIGHT, LIGHT_INNER, LIGHT_OUTER };
+    static const struct {
+        GPIO_TypeDef * port;
+        uint16_t pin;
+    } lighting_leds[] = {
+            [LIGHT_LEFT]  = { GPIOB, GPIO_Pin_4  },
+            [LIGHT_RIGHT] = { GPIOB, GPIO_Pin_5  },
+            [LIGHT_INNER] = { GPIOB, GPIO_Pin_3  },
+            [LIGHT_OUTER] = { GPIOA, GPIO_Pin_15 },
+    };
+
     switch(state) {
+        case LIGHT_OP_NONE:
+            printf("\r"PROMPT"RETURNING TO MAIN MENU");
+            break;
         case LIGHT_OP_LEFT:
-            if(GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_4) == Bit_SET) {
-                GPIO_ResetBits(GPIOB, GPIO_Pin_4);
-            }
-            else {
-                GPIO_SetBits(GPIOB, GPIO_Pin_4);
-            }
+            printf("\r"PROMPT"CHANGE LEFT LED STATE ");
+            LIGHTING_CHANGE_LEDS_STATE(lighting_leds[LIGHT_LEFT]);
             break;
         case LIGHT_OP_RIGHT:
-            if(GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_5) == Bit_SET) {
-                GPIO_ResetBits(GPIOB, GPIO_Pin_5);
-            }
-            else {
-                GPIO_SetBits(GPIOB, GPIO_Pin_5);
-            }
+            printf("\r"PROMPT"CHANGE RIGHT LED STATE");
+            LIGHTING_CHANGE_LEDS_STATE(lighting_leds[LIGHT_RIGHT]);
             break;
         case LIGHT_OP_INNER:
-            if(GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_3) == Bit_SET) {
-                GPIO_ResetBits(GPIOB, GPIO_Pin_3);
-            }
-            else {
-                GPIO_SetBits(GPIOB, GPIO_Pin_3);
-            }
+            printf("\r"PROMPT"CHANGE INNER LED STATE");
+            LIGHTING_CHANGE_LEDS_STATE(lighting_leds[LIGHT_INNER]);
             break;
         case LIGHT_OP_OUTER:
-            if(GPIO_ReadOutputDataBit(GPIOA, GPIO_Pin_15) == Bit_SET) {
-                GPIO_ResetBits(GPIOA, GPIO_Pin_15);
-            }
-            else {
-                GPIO_SetBits(GPIOA, GPIO_Pin_15);
-            }
+            printf("\r"PROMPT"CHANGE OUTER LED STATE");
+            LIGHTING_CHANGE_LEDS_STATE(lighting_leds[LIGHT_OUTER]);
             break;
         default:
-            printf("Lighting operation not supported!\n\r");
+            state = (state < '0') ? '#' : state;
+            printf("\r"PROMPT"'%c' NOT SUPPORTED!    ", state);
+            break;
     }
 }
 

@@ -12,11 +12,18 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 
-extern xSemaphoreHandle xRecMutexI2CSequence;
+typedef struct {
+    const uint8_t devAddr;
+    const uint8_t ctrlReg;
+    uint8_t* data;
+    uint16_t dataSize;
+} I2cParams_t;
+
 extern xSemaphoreHandle xSemaphI2CLcdInitDone;
 
 extern uint8_t xI2C_write_sequence(uint8_t device, uint8_t *buf, uint8_t cnt);
-extern uint8_t xI2C_read_sequence(uint8_t device, uint8_t *subaddr, uint8_t acnt, uint8_t *buf, uint8_t bcnt);
+extern uint8_t xI2C_write_sequence1(I2cParams_t* params);
+extern uint8_t xI2C_read_sequence(I2cParams_t* params);
 
 extern void vI2C_configuration(void);
 

@@ -44,7 +44,7 @@ typedef enum
 } menuLevel_t;
 
 
-#define MAIN_CONSOLE_MENU_TEXT      "\n\r"                              \
+#define CONSOLE_MAIN_MENU_TEXT      "\n\r"                              \
                                     "--------------------------\n\r"    \
                                     "|          MENU          |\n\r"    \
                                     "--------------------------\n\r"    \
@@ -68,7 +68,7 @@ typedef enum
 * Return         : None
 * Attention		 : None
 *******************************************************************************/
-#define CON_IS_MAIN_MENU_NEEDED(submenu)  ((submenu) != MENU_MAIN && (submenu) != MENU_MAIN_CALL)
+#define CONSOLE_IS_MAIN_MENU_NEEDED(submenu)  ((submenu) != MENU_MAIN && (submenu) != MENU_MAIN_CALL)
 void vConsoleInterfaceTask(void * pvArg)
 {
     setvbuf(stdin, NULL, _IONBF, 0);
@@ -82,11 +82,11 @@ void vConsoleInterfaceTask(void * pvArg)
     while(1) {
         static menuLevel_t submenu = MENU_MAIN;
 
-        submenu = (CON_IS_MAIN_MENU_NEEDED(submenu) == true) ? MENU_MAIN :  getchar();
+        submenu = (CONSOLE_IS_MAIN_MENU_NEEDED(submenu) == true) ? MENU_MAIN :  getchar();
         switch(submenu) {
             case MENU_MAIN_CALL:
             case MENU_MAIN: {
-                printf(MAIN_CONSOLE_MENU_TEXT);
+                printf(CONSOLE_MAIN_MENU_TEXT);
                 break;
             }
             case MENU_MOVEMENT: {

@@ -112,8 +112,8 @@ int main(void)
 //    xTaskCreate(vOrientSensorServiceTask, (signed char *) "Orinent sensors",
 //        ORSENSORS_SERVICE_TASK_STACK_SIZE, NULL, ORSENSORS_SERVICE_TASK_PRIORITY, NULL);
 
-//    xTaskCreate(vLcdInterfaceTask, (signed char *) "LCD",
-//        LCD_INTERFACE_TASK_STACK_SIZE, NULL, LCD_INTERFACE_TASK_PRIORITY, NULL);
+    xTaskCreate(vLcdInterfaceTask, (signed char *) "LCD",
+        LCD_INTERFACE_TASK_STACK_SIZE, NULL, LCD_INTERFACE_TASK_PRIORITY, NULL);
 
         
     /* Start the scheduler. */
@@ -188,7 +188,6 @@ static void prvSetupHardware(void)
     vSemaphoreCreateBinary(xSemaphLedSignal);
     vSemaphoreCreateBinary(xSemaphI2CLcdInitDone);
     vSemaphoreCreateBinary(xSemaphRadioPacketReady);
-    xRecMutexI2CSequence = xSemaphoreCreateRecursiveMutex();
 
     // semaphores are in ready state at start, so to release them have use take
     xSemaphoreTake(xSemaphLedSignal, portMAX_DELAY);
@@ -201,6 +200,8 @@ static void prvSetupHardware(void)
     vI2C_configuration();
     vSound_configuration();
     vLighting_configuration();
+
+    vLCD_Startup();
 
 }
 
