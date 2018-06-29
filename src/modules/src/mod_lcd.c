@@ -27,6 +27,7 @@
 #include "mod_lcd_consts.h"
 #include "mod_i2c.h"
 #include "mod_sensors.h"
+#include "mod_orientation_sensor.h"
 #include "stm32f10x_it.h"
 
 #include "FreeRTOS.h"
@@ -39,13 +40,13 @@
 #define REG_CMD          0x01
 #define REG_DAT          0x02
 #define REG_RESET        0x03
-    #define RESET_OLED      0x06
+#define RESET_OLED      0x06
 #define REG_VERSION      0x1F
 #define REG_VCOMH         0x05
 #define REG_STATUS        0x06
-    #define STATUS_RUN            0x00
-    #define STATUS_SET_ADDRESS    0x02
-    #define STATUS_BUSY           0x10
+#define STATUS_RUN            0x00
+#define STATUS_SET_ADDRESS    0x02
+#define STATUS_BUSY           0x10
 
 #define REG_ADDRESS      0x08
 #define REG_BRIGHTNESS   0x0A
@@ -60,14 +61,15 @@
 #define SCROLL_DOWN     0x00
 #define SCROLL_RIGHT    0x26
 #define SCROLL_LEFT     0x27
-#define SCROLL_VR       0x29
-#define SCROLL_VL       0x2A
+#define SCROLL_VR       0x00
+#define SCROLL_VL       0x01
 
 #define FRAMS_2         0x07
 #define FRAMS_3         0x04
 #define FRAMS_4         0x05
-#define FRAMS_5         0x00
-#define FRAMS_25        0x06
+#define FRAMS_5        0x06
+//#define FRAMS_5         0x00
+//#define FRAMS_25        0x06
 #define FRAMS_64        0x01
 #define FRAMS_128       0x02
 #define FRAMS_256       0x03
@@ -82,8 +84,9 @@ xQueueHandle xQueueLcdControl = NULL;
 
 //static void vLCD_Configuration(void);
 
+static void vLCD_Configuration(void);;
 static int ZtScI2cMxReset(void);
-static int ZtScI2cMxSetAddress(void);
+static int ZtScI2cMxSetAddress(uint8_t addr);
 static int ZtScI2cMxReadState(uint8_t* state);
 static int ZtScI2cMxReadVersion(uint8_t * vbuff);
 static int ZtScI2cMxDisplay8x16Str(uint8_t page, uint8_t column, const char *str);
@@ -104,7 +107,7 @@ static bool ZtScI2cMxWaitLcdReady(void)
 
     while(1) {
         ZtScI2cMxReadState(&status);
-        if(status == 0x00) {
+        if(status == STATUS_RUN) {
             fresult = true;
             break;
         }
@@ -122,32 +125,52 @@ static bool ZtScI2cMxWaitLcdReady(void)
 
 static int ZtScI2cMxReset(void)
 {
-    uint8_t addr = 0;
-    uint8_t buff[2] = {0};
+    I2cParams_t params =
+    {
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_RESET,
+        .data = NULL,
+        .dataSize = 1,
+    };
+    uint8_t data = RESET_OLED;
 
-    addr = ZTSCI2CMX_ADDRESS;
-    buff[0] =  REG_RESET;
-    buff[1] =  RESET_OLED;
-
-
-    return xI2C_write_sequence(addr, buff, 2);
+    params.data = &data;
+    ZtScI2cMxWaitLcdReady();
+    return xI2C_write_sequence1(&params);
 }
 
-static int ZtScI2cMxSetAddress(void)
+//static int ZtScI2cMxReset(void)
+//{
+//    uint8_t addr = 0;
+//    uint8_t buff[2] = {0};
+//
+//    addr = ZTSCI2CMX_ADDRESS;
+//    buff[0] =  REG_RESET;
+//    buff[1] =  RESET_OLED;
+//
+//
+//    return xI2C_write_sequence(addr, buff, 2);
+//}
+
+static int ZtScI2cMxSetAddress(uint8_t addr)
 {
-    uint8_t addr = 0;
-    unsigned char buff[2] = {0};
-    
-    addr = ZTSCI2CMX_ADDRESS;
-    buff[0] = REG_ADDRESS;    
-    buff[1] = addr;    
-    return xI2C_write_sequence(ZTSCI2CMX_DADDRESS, buff, 2);
-}
+    I2cParams_t params =
+    {
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_ADDRESS,
+        .data = NULL,
+        .dataSize = 1,
+    };
+    uint8_t data = addr;
 
+    params.data = &data;
+    ZtScI2cMxWaitLcdReady();
+    return xI2C_write_sequence1(&params);
+}
 
 static int ZtScI2cMxReadState(uint8_t* state)
 {
-    static I2cParams_t params =
+    I2cParams_t params =
     {
         .devAddr = ZTSCI2CMX_ADDRESS<<1,
         .ctrlReg = REG_STATUS,
@@ -161,7 +184,7 @@ static int ZtScI2cMxReadState(uint8_t* state)
 
 static int ZtScI2cMxReadVersion(uint8_t* vbuff)
 {
-    static I2cParams_t params =
+    I2cParams_t params =
     {
         .devAddr = ZTSCI2CMX_ADDRESS<<1,
         .ctrlReg = REG_VERSION,
@@ -175,144 +198,205 @@ static int ZtScI2cMxReadVersion(uint8_t* vbuff)
 
 static int ZtScI2cMxDisplay8x16Str(uint8_t page, uint8_t column, const char *str)
 {
-    int fresult = 0;
-    uint8_t addr = 0;
-    uint8_t buff[19] = {0};
-    uint8_t i = 0;
-        
-    addr = ZTSCI2CMX_ADDRESS;
-    buff[0] = REG_8X16STR;
-    buff[1] = page;
-    buff[2] = column;
-    
-    i=0;
-    while ((*str != '\0') && (i<16))
+    I2cParams_t params =
     {
-       buff[i+3] = (uint8_t)*str++;
-       i++;
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_8X16STR,
+        .data = NULL,
+        .dataSize = 2,
+    };
+    uint8_t data[18] =
+    {
+        [0] = page,
+        [1] = column,
+    };
+    uint8_t i = 0;
+    uint8_t* dataStr = &data[2];
+
+    params.dataSize = 2;
+    for(i=0; i < 16 && str[i] != '\0'; i++) {
+        dataStr[i] = str[i];
+        params.dataSize++;
     }
 
+    params.data = data;
     ZtScI2cMxWaitLcdReady();
-    return xI2C_write_sequence(addr, buff, i+3);
+    return xI2C_write_sequence1(&params);
 }
 
 static int ZtScI2cMxFillArea(uint8_t spage, uint8_t epage, uint8_t scolumn, uint8_t ecolumn, uint8_t filldata)
 {
-    uint8_t addr = 0;
-    uint8_t buff[6] = {0};
-    
-    addr = ZTSCI2CMX_ADDRESS;
-    buff[0] = REG_FILL_AREA;
-    buff[1] = spage;
-    buff[2] = epage;
-    buff[3] = scolumn;
-    buff[4] = ecolumn;
-    buff[5] = filldata;
+    I2cParams_t params =
+    {
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_FILL_AREA,
+        .data = NULL,
+        .dataSize = 5,
+    };
+    uint8_t data[] =
+    {
+        [0] = spage,
+        [1] = epage,
+        [2] = scolumn,
+        [3] = ecolumn,
+        [4] = filldata
+    };
 
+    params.data = data;
     ZtScI2cMxWaitLcdReady();
-    return xI2C_write_sequence(addr, buff, 6);
+    return xI2C_write_sequence1(&params);
 }
 
 static int ZtScI2cMxClearScreen(void)
 {
-    ZtScI2cMxFillArea(0, 8, 0, 128, 0x00);
+    I2cParams_t params =
+    {
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_FILL_AREA,
+        .data = NULL,
+        .dataSize = 5,
+    };
+    static uint8_t data[] =
+    {
+        [0] = 0x00,
+        [1] = 0x08,
+        [2] = 0x00,
+        [3] = 0x80,
+        [4] = 0x00
+    };
+
+    params.data = data;
+    ZtScI2cMxWaitLcdReady();
+    return xI2C_write_sequence1(&params);
 }
 
 static int ZtScI2cMxScrollingHorizontal(uint8_t lr, uint8_t spage, uint8_t epage, uint8_t frames)
 {
-    uint8_t addr = 0;
-    uint8_t buff[9] = {0};
+    I2cParams_t params =
+    {
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_CMD,
+        .data = NULL,
+        .dataSize = 8,
+    };
+    uint8_t data[] =
+    {
+        [0] = lr,
+        [1] = 0x00,
+        [2] = spage,
+        [3] = frames,
+        [4] = epage,
+        [5] = 0x00,
+        [6] = 0xFF,
+        [7] = 0x2F
+    };
 
-    addr = ZTSCI2CMX_ADDRESS;
-    buff[0] = REG_CMD;
-    buff[1] = lr;
-    buff[2] = 0x00;
-    buff[3] = spage;
-    buff[4] = frames;
-    buff[5] = epage;
-    buff[6] = 0x00;
-    buff[7] = 0xFF;
-    buff[8] = 0x2F;
-    return xI2C_write_sequence(addr, buff, 9);
+    params.data = data;
+    return xI2C_write_sequence1(&params);
 }
 
 static int ZtScI2cMxScrollingVertical(uint8_t scrollupdown, uint8_t rowsfixed, uint8_t rowsscroll, uint8_t scrollstep, uint8_t stepdelay)
 {
-    uint8_t addr = 0;
-    uint8_t buff[6] = {0};
+    I2cParams_t params =
+    {
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_SCROVER,
+        .data = NULL,
+        .dataSize = 5,
+    };
+    uint8_t data[] =
+    {
+        [0] = scrollupdown,
+        [1] = rowsfixed,
+        [2] = rowsscroll,
+        [3] = scrollstep,
+        [4] = stepdelay
+    };
 
-    addr = ZTSCI2CMX_ADDRESS;;
-    buff[0] = REG_SCROVER;
-    buff[1] = scrollupdown;
-    buff[2] = rowsfixed;
-    buff[3] = rowsscroll;
-    buff[4] = scrollstep;
-    buff[5] = stepdelay;
-    return xI2C_write_sequence(addr, buff, 6);
+    params.data = data;
+    ZtScI2cMxWaitLcdReady();
+    return xI2C_write_sequence1(&params);
 }
 
 static int ZtScI2cMxScrollingVerticalHorizontal(uint8_t Sdirection, uint8_t spage, uint8_t epage, uint8_t fixedarea, uint8_t scrollarea, uint8_t offset, uint8_t frames)
 {
-    uint8_t addr = 0;
-    uint8_t buff[8] = {0};
-    
-    addr = ZTSCI2CMX_ADDRESS;;
-    buff[0] = REG_SCROVERHOR;
-    buff[1] = Sdirection;
-    buff[2] = spage;
-    buff[3] = epage;
-    buff[4] = fixedarea;
-    buff[5] = scrollarea;
-    buff[6] = offset;
-    buff[7] = frames;
-    return xI2C_write_sequence(addr, buff, 8);
+    I2cParams_t params =
+    {
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_SCROVERHOR,
+        .data = NULL,
+        .dataSize = 7
+    };
+    uint8_t data[] =
+    {
+        [0] = Sdirection,
+        [1] = spage,
+        [2] = epage,
+        [3] = fixedarea,
+        [4] = scrollarea,
+        [5] = offset,
+        [6] = frames
+    };
+
+    params.data = data;
+    ZtScI2cMxWaitLcdReady();
+    return xI2C_write_sequence1(&params);
 }
 
 static int ZtScI2cMxDeactivateScroll(void)
 {
-    uint8_t addr = 0;
-    uint8_t buff[2] = {0};
+    I2cParams_t params =
+    {
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_CMD,
+        .data = NULL,
+        .dataSize = 1
+    };
+    uint8_t data = 0x2E;
 
-    addr = ZTSCI2CMX_ADDRESS;
-    buff[0] =  REG_CMD;
-    buff[1] =  0x2E;
-    return xI2C_write_sequence(addr, buff, 2);
+    params.data = &data;
+    ZtScI2cMxWaitLcdReady();
+    return xI2C_write_sequence1(&params);
 }
 
 static int ZtScI2cMxSetLocation(uint8_t page, uint8_t column)
 {
-    uint8_t addr = 0;
-    uint8_t buff[4] = {0};
+    I2cParams_t params =
+    {
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_CMD,
+        .data = NULL,
+        .dataSize = 3
+    };
+    uint8_t data[] =
+    {
+        [0] = 0xB0|page,
+        [1] = column%16,
+        [2] = column/16+0x10
+    };
 
-    addr = ZTSCI2CMX_ADDRESS;
-    buff[0] =  REG_CMD;
-    buff[1] =  0xB0|page;
-    buff[2] =  column%16;
-    buff[3] =  column/16+0x10;
-
-    return xI2C_write_sequence(addr, buff, 4);
+    params.data = data;
+    return xI2C_write_sequence1(&params);
 }
 
 static void ZtScI2cMxDisplayDot16x16(uint8_t page, uint8_t column, const char *valf)
 {
-    uint8_t addr = 0;
-    uint8_t buff[17] = {0};
-    uint8_t i = 0;
-    
-    addr = ZTSCI2CMX_ADDRESS;
-    buff[0] = REG_DAT;
+    I2cParams_t params =
+    {
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_DAT,
+        .data = NULL,
+        .dataSize = 16
+    };
+
+
+    params.data = &valf[0];
     ZtScI2cMxSetLocation(page, column);
-    for (i=0; i<16; i++)
-    {
-       buff[i+1] = valf[i];
-    }
-    xI2C_write_sequence(addr, buff, 17);
+    xI2C_write_sequence1(&params);
+
+    params.data = &valf[16];
     ZtScI2cMxSetLocation(page+1, column);
-    for (i=0; i<16; i++)
-    {
-       buff[i+1] = valf[i+16];
-    }
-    xI2C_write_sequence(addr, buff, 17);
+    xI2C_write_sequence1(&params);
 }
 
 /* 
@@ -327,15 +411,17 @@ static void ZtScI2cMxDisplayDot16x16(uint8_t page, uint8_t column, const char *v
  */
 static int ZtScI2cMxSetBrightness(uint8_t val)
 {
-    uint8_t addr = 0;
-    uint8_t buff[2] = {0};
+    I2cParams_t params =
+    {
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_BRIGHTNESS,
+        .data = NULL,
+        .dataSize = 1,
+    };
 
-    addr = ZTSCI2CMX_ADDRESS;
-    buff[0] =  REG_BRIGHTNESS;
-    buff[1] =  val;
-
+    params.data = &val;
     ZtScI2cMxWaitLcdReady();
-    return xI2C_write_sequence(addr, buff, 2);
+    return xI2C_write_sequence1(&params);
 }
 
 /*
@@ -350,20 +436,22 @@ static int ZtScI2cMxSetBrightness(uint8_t val)
 */
 static int ZtScI2cMxSetVcomH(uint8_t val)
 {
-    uint8_t addr = 0;
-    uint8_t buff[2] = {0};
+    I2cParams_t params =
+    {
+        .devAddr = ZTSCI2CMX_ADDRESS<<1,
+        .ctrlReg = REG_VCOMH,
+        .data = NULL,
+        .dataSize = 1,
+    };
 
-    addr = ZTSCI2CMX_ADDRESS;
-    buff[0] =  REG_VCOMH;
-    buff[1] =  val;
-
+    params.data = &val;
     ZtScI2cMxWaitLcdReady();
-    return xI2C_write_sequence(addr, buff, 2);
+    return xI2C_write_sequence1(&params);
 }
 
 static void ZtScI2cMxDisplayArea(uint8_t spage, uint8_t epage, uint8_t scolumn, uint8_t ecolumn, const char *pt)
 {
-    static I2cParams_t params =
+    I2cParams_t params =
     {
         .devAddr = ZTSCI2CMX_ADDRESS<<1,
         .ctrlReg = REG_DAT,
@@ -376,8 +464,8 @@ static void ZtScI2cMxDisplayArea(uint8_t spage, uint8_t epage, uint8_t scolumn, 
     uint8_t width = ecolumn - scolumn;
 
     ZtScI2cMxWaitLcdReady();
-    for(i=0; i < height; i++) {
-        ZtScI2cMxSetLocation(spage + i, scolumn);
+    for(i=0; i < height; i++, spage++) {
+        ZtScI2cMxSetLocation(spage, scolumn);
 
         params.data = pt;
         params.dataSize = width;
@@ -385,6 +473,34 @@ static void ZtScI2cMxDisplayArea(uint8_t spage, uint8_t epage, uint8_t scolumn, 
 
         xI2C_write_sequence1(&params);
     }
+}
+
+static int isLcdMenuButtonPressed(void)
+{
+    register int pressed = 0;
+
+    if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_2) == Bit_SET) {
+        while(GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_2) == Bit_SET) {
+            vTaskDelay(25);
+        }
+        pressed = 1;
+    }
+
+    return pressed;
+}
+
+static int isLcdSelectionButtonPressed(void)
+{
+    register int pressed = 0;
+
+    if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_8) == Bit_SET) {
+        while(GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_8) == Bit_SET) {
+            vTaskDelay(25);
+        }
+        pressed = 1;
+    }
+
+    return pressed;
 }
 
 void vLcdScrSaverCallback(xTimerHandle pxTimer)
@@ -437,7 +553,7 @@ void vLcdInterfaceTask(void * pvArg)
     }
 
 
-    xLcdScrSaverTimer = xTimerCreate((signed char *)"Lcd SS timer", 2000, pdFALSE, (void *)4, vLcdScrSaverCallback);
+    xLcdScrSaverTimer = xTimerCreate((signed char *)"Lcd SS timer", 1000, pdFALSE, (void *)4, vLcdScrSaverCallback);
     xLcdClearScreenTimer = xTimerCreate((signed char *)"Lcd clear screen timer", 3000, pdFALSE, (void *)5, vLcdClearScrCallback);
     xTimerStart(xLcdScrSaverTimer, 0);
     
@@ -530,6 +646,141 @@ void vLcdInterfaceTask(void * pvArg)
 
             snprintf(text, 20, "Front: %.2f", distance[SENSOR_FRONT]);
             //ZtScI2cMxDisplay8x16Str(3, 0, text);
+
+            extern AcclData_t acclData;
+            char acclBuff[10+1] = {0};
+
+            int tmp = acclData.vect.x * 10;
+            if(tmp < 0) {
+                snprintf(acclBuff, 10, "X:%.1f", acclData.vect.x);
+            }
+            else {
+                snprintf(acclBuff, 10, "X: %.1f", acclData.vect.x);
+            }
+            ZtScI2cMxDisplay8x16Str(2, 78, acclBuff);
+
+            tmp = acclData.vect.y * 10;
+            if(tmp < 0) {
+                snprintf(acclBuff, 10, "Y:%.1f", acclData.vect.y);
+            }
+            else {
+                snprintf(acclBuff, 10, "Y: %.1f", acclData.vect.y);
+            }
+            ZtScI2cMxDisplay8x16Str(4, 78, acclBuff);
+
+            tmp = acclData.vect.z * 10;
+            if(tmp < 0) {
+                snprintf(acclBuff, 10, "Z:%.1f", acclData.vect.z);
+            }
+            else {
+                snprintf(acclBuff, 10, "Z: %.1f", acclData.vect.z);
+            }
+            ZtScI2cMxDisplay8x16Str(6, 78, acclBuff);
+
+
+            if(isLcdMenuButtonPressed()) {
+                printf("[%s] Menu button pressed!!\n", __func__);
+
+                xTimerStop(xLcdScrSaverTimer, 0);
+
+                ZtScI2cMxClearScreen();
+                ZtScI2cMxDisplay8x16Str(2, 0, "      MENU      ");
+                ZtScI2cMxScrollingVertical(SCROLL_DOWN, 0, 64, 1, 1000);
+                vTaskDelay(2000);
+                ZtScI2cMxDeactivateScroll();
+
+                while(1) {
+                    static int menu = 0, sel = 0;
+
+                    if(menu != 1) {
+                        ZtScI2cMxDisplay8x16Str(0, 0, "    option 1    ");
+                    }
+                    else {
+                        if(sel) {
+                            sel = 0;
+                            ZtScI2cMxClearScreen();
+                            ZtScI2cMxDisplay8x16Str(2, 0, "Selected opt. 1");
+                            ZtScI2cMxScrollingVertical(SCROLL_DOWN, 0, 64, 1, 1000);
+                            vTaskDelay(2000);
+
+                            continue;
+                        }
+                        else {
+                            ZtScI2cMxDisplay8x16Str(0, 0, "*    option 1   ");
+                        }
+                    }
+
+                    if(menu != 2) {
+                        ZtScI2cMxDisplay8x16Str(2, 0, "    option 2    ");
+                    }
+                    else {
+                        if(sel) {
+                            sel = 0;
+                            ZtScI2cMxClearScreen();
+                            ZtScI2cMxDisplay8x16Str(2, 0, "Selected opt. 2");
+                            ZtScI2cMxScrollingVertical(SCROLL_DOWN, 0, 64, 1, 1000);
+                            vTaskDelay(2000);
+                            continue;
+                        }
+                        else {
+                            ZtScI2cMxDisplay8x16Str(2, 0, "*    option 2   ");
+                        }
+                    }
+
+                    if(menu != 3) {
+                        ZtScI2cMxDisplay8x16Str(4, 0, "    option 3    ");
+                    }
+                    else {
+                        if(sel) {
+                            sel = 0;
+                            ZtScI2cMxClearScreen();
+                            ZtScI2cMxDisplay8x16Str(2, 0, "Selected opt. 3");
+                            ZtScI2cMxScrollingVertical(SCROLL_DOWN, 0, 64, 1, 1000);
+                            vTaskDelay(2000);
+                            continue;
+                        }
+                        else {
+                            ZtScI2cMxDisplay8x16Str(4, 0, "*    option 3   ");
+                        }
+                    }
+
+                    if(menu != 4) {
+                        ZtScI2cMxDisplay8x16Str(6, 0, "      EXIT      ");
+                    }
+                    else {
+                        if(sel) {
+                            sel = 0;
+                            ZtScI2cMxClearScreen();
+                            ZtScI2cMxDisplay8x16Str(2, 0, " EXITTING MENU! ");
+                            ZtScI2cMxScrollingVertical(SCROLL_DOWN, 0, 64, 1, 1000);
+                            vTaskDelay(2000);
+                            break;
+                        }
+                        else {
+                            ZtScI2cMxDisplay8x16Str(6, 0, "*      EXIT     ");
+                        }
+                    }
+
+                    sel = 0;
+                    while(1) {
+                        if(isLcdMenuButtonPressed()) {
+                            menu = (menu < 4) ? menu+1 : 1;
+                            break;
+                        }
+                        if(isLcdSelectionButtonPressed()) {
+                            sel = 1;
+                            break;
+                        }
+                        vTaskDelay(100);
+                    }
+                }
+
+                xTimerStart(xLcdScrSaverTimer, 0);
+            }
+
+            if(isLcdSelectionButtonPressed()) {
+                printf("[%s] Selection button pressed!!\n", __func__);
+            }
         }
 
         if(lcdStartScrSaver == true) {
@@ -561,6 +812,25 @@ void vLcdInterfaceTask(void * pvArg)
             if(robotNb == 1) {
                 ZtScI2cMxDisplayArea(0, 8, 0, 64, robot_3);
                 robotNb = 2;
+                //vTaskDelay(1000);
+                //ZtScI2cMxDisplayArea(0, 8, 0, 64, robot_4);
+                //vTaskDelay(1000);
+                //ZtScI2cMxDeactivateScroll();
+                //ZtScI2cMxScrollingHorizontal(SCROLL_RIGHT, 0, 1, FRAMS_128);
+                //ZtScI2cMxScrollingVertical(SCROLL_DOWN, 0, 64, 1, 100);
+                //ZtScI2cMxDeactivateScroll();
+                //vTaskDelay(1000);
+
+                //ZtScI2cMxDisplayArea(0, 8, 0, 64, robot_3);
+                //vTaskDelay(1000);
+                //ZtScI2cMxDisplayArea(0, 8, 0, 64, robot_4);
+                //vTaskDelay(1000);
+                //ZtScI2cMxScrollingVerticalHorizontal(0x00, 0, 7, 0, 64, 1, FRAMS_2);
+
+
+                //while(1) vTaskDelay(10000);
+                //ZtScI2cMxDeactivateScroll();
+                //ZtScI2cMxClearScreen();
             }
             else {
                 ZtScI2cMxDisplayArea(0, 8, 0, 64, robot_4);
@@ -579,6 +849,8 @@ void vLcdInterfaceTask(void * pvArg)
                     break;
                 default: {}
                 }
+
+
         }
         
         if(lcdClearScreen == true) {
@@ -591,26 +863,36 @@ void vLcdInterfaceTask(void * pvArg)
     }
 }
 
-void vLCD_Startup(void)
+static void vLCD_Configuration(void)
 {
     // LCD initialization sequence should be the first on I2C line and I2C line
     // should be released for some time to prevent demo mode from being started
+
+    vTaskDelay(100);
     ZtScI2cMxReset();
-
-    //vTaskDelay(10);
-    //xSemaphoreGive(xSemaphI2CLcdInitDone);
-}
-void vLCD_Configuration(void)
-{
-    // LCD initialization sequence should be the first on I2C line and I2C line
-    // should be released for some time to prevent demo mode from being started
-
     vTaskDelay(10);
     ZtScI2cMxSetBrightness(0xFF);
     ZtScI2cMxSetVcomH(7);
     
-    //vTaskDelay(10);
+    uint8_t ZtScI2cMxVersion[16+1] = {0};
+    ZtScI2cMxReadVersion(ZtScI2cMxVersion);
+    ZtScI2cMxDisplay8x16Str(0, 0, "OLED INITIALIZED");
+    ZtScI2cMxDisplay8x16Str(3, 0, "   FW VERSION   ");
+    ZtScI2cMxDisplay8x16Str(5, 0, ZtScI2cMxVersion);
+
+    vTaskDelay(2000);
+    ZtScI2cMxClearScreen();
+    vTaskDelay(1000);
     //xSemaphoreGive(xSemaphI2CLcdInitDone);
+
+    static GPIO_InitTypeDef GPIO_InitStructure =
+    {
+        .GPIO_Pin   = GPIO_Pin_2 | GPIO_Pin_8,
+        .GPIO_Mode  = GPIO_Mode_IPD
+    };
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 
 

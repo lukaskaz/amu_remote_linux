@@ -23,7 +23,7 @@
 #include "task.h"
 #include "stm32f10x.h"
 
-#define I2C_TIME_DELAY_TICKS    100U
+#define I2C_TIME_DELAY_TICKS    20U
 
 typedef enum {
     I2C_DIR_OUTPUT = 0,
@@ -56,17 +56,21 @@ xSemaphoreHandle xSemaphI2CLcdInitDone = NULL;
 
 static inline void vI2C_ticks_delay(I2C_operation_t op)
 {
+    volatile register uint32_t delay = 0;
+
     if(op == I2C_OP_WRITE_SEQ) {
-        // no delay here, perform full speed transfer
+        delay = 1;
+        // just symbolic delay here, perform full speed transfer
     }
     else if(op == I2C_OP_READ_SEQ) {
-        volatile uint32_t delay = I2C_TIME_DELAY_TICKS;
-
-        while(delay--);
+        delay = I2C_TIME_DELAY_TICKS;
     }
     else {
-        // not supported case, do nothing
+        // not supported case, abort
+        return;
     }
+
+    while(delay--);
 }
 
 static inline void vI2C_set_sda_dir(I2CDirection_t dir)
@@ -122,7 +126,7 @@ static inline void vI2C_set_sda(I2C_pinState_t state)
 
 static inline I2C_pinState_t xI2C_read_sda_state(void)
 {
-    I2C_pinState_t dat = I2C_PIN_UNDEF;
+    register I2C_pinState_t dat = I2C_PIN_UNDEF;
 
     if (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1) == Bit_SET) {
         dat = I2C_PIN_HIGH;
@@ -154,6 +158,7 @@ static void vI2C_start_transmission(I2C_operation_t op)
     vI2C_set_scl(I2C_PIN_HIGH);
     vI2C_ticks_delay(op);
     vI2C_set_sda(I2C_PIN_LOW);
+    vI2C_ticks_delay(op);
     vI2C_set_scl(I2C_PIN_LOW);
     vI2C_ticks_delay(op);
 }
@@ -172,6 +177,7 @@ static void vI2C_stop_transmission(I2C_operation_t op)
     vI2C_set_sda(I2C_PIN_LOW);
     vI2C_ticks_delay(op);
     vI2C_set_scl(I2C_PIN_HIGH);
+    vI2C_ticks_delay(op);
     vI2C_set_sda(I2C_PIN_HIGH);
     vI2C_ticks_delay(op);
 
@@ -191,6 +197,7 @@ static uint8_t xI2C_write_byte(I2C_operation_t op, uint8_t dat)
     uint8_t i = 0, ack = 1;
 
     vI2C_set_sda_dir(I2C_DIR_OUTPUT);
+
     for(i=0; i<8; i++)
     {
         vI2C_ticks_delay(op);
@@ -203,14 +210,18 @@ static uint8_t xI2C_write_byte(I2C_operation_t op, uint8_t dat)
         }
         dat<<=1;
 
+        vI2C_ticks_delay(op);
         vI2C_set_scl(I2C_PIN_HIGH);
+        vI2C_ticks_delay(op);
         vI2C_ticks_delay(op);
         vI2C_set_scl(I2C_PIN_LOW);
     }
 
     vI2C_ticks_delay(op);
+    vI2C_ticks_delay(op);
     vI2C_set_sda_dir(I2C_DIR_INPUT);
     vI2C_set_scl(I2C_PIN_HIGH);
+    vI2C_ticks_delay(op);
     vI2C_ticks_delay(op);
     ack = (uint8_t)xI2C_read_sda_state();
     vI2C_set_scl(I2C_PIN_LOW);
@@ -232,6 +243,7 @@ static uint8_t xI2C_read_byte(I2C_operation_t op, uint8_t ack)
     for(i=0; i<8; i++)
     {
         vI2C_ticks_delay(op);
+        vI2C_ticks_delay(op);
         vI2C_set_scl(I2C_PIN_HIGH);
         vI2C_ticks_delay(op);
 
@@ -240,14 +252,16 @@ static uint8_t xI2C_read_byte(I2C_operation_t op, uint8_t ack)
             dat |= 1;
         }
 
-
+        vI2C_ticks_delay(op);
         vI2C_set_scl(I2C_PIN_LOW);
     }
 
-    vI2C_ticks_delay(op);
     vI2C_set_sda_dir(I2C_DIR_OUTPUT);
     vI2C_set_sda(ack);    // ack = 0; ask, ack = 1,stop
+    vI2C_ticks_delay(op);
+    vI2C_ticks_delay(op);
     vI2C_set_scl(I2C_PIN_HIGH);
+    vI2C_ticks_delay(op);
     vI2C_ticks_delay(op);
     vI2C_set_scl(I2C_PIN_LOW);
 
@@ -260,27 +274,27 @@ static uint8_t xI2C_read_byte(I2C_operation_t op, uint8_t ack)
  * Para: device -> device address, buf->subaddress + data
  * Return : how many bytes have been write
 ************************************************************************/
-uint8_t xI2C_write_sequence(uint8_t device, uint8_t *buf, uint8_t cnt)
-{
-    uint8_t i = 0;
-    static const I2C_operation_t op = I2C_OP_WRITE_SEQ;
-
-    vI2C_start_transmission(op);
-    if(xI2C_write_byte(op, (device<<1)&(0xFE)) == 0)   //shift device addres left by 1 and clear last bit (write op)
-    {
-        for(i=0; i<cnt; i++) {
-            if(xI2C_write_byte(op, buf[i]) == 1) {
-                break;
-            }
-        }
-    }
-    else {
-        // nack for given device address byte, end i2c communication
-    }
-    vI2C_stop_transmission(op);
-
-    return i;
-}
+//uint8_t xI2C_write_sequence(uint8_t device, uint8_t *buf, uint8_t cnt)
+//{
+//    uint8_t i = 0;
+//    static const I2C_operation_t op = I2C_OP_WRITE_SEQ;
+//
+//    vI2C_start_transmission(op);
+//    if(xI2C_write_byte(op, (device<<1)&(0xFE)) == 0)   //shift device addres left by 1 and clear last bit (write op)
+//    {
+//        for(i=0; i<cnt; i++) {
+//            if(xI2C_write_byte(op, buf[i]) == 1) {
+//                break;
+//            }
+//        }
+//    }
+//    else {
+//        // nack for given device address byte, end i2c communication
+//    }
+//    vI2C_stop_transmission(op);
+//
+//    return i;
+//}
 
 
 uint8_t xI2C_write_sequence1(I2cParams_t* params)
@@ -348,20 +362,26 @@ void vI2C_configuration(void)
 {
     static GPIO_InitTypeDef GPIO_InitStructure =
     {
-        .GPIO_Pin   = GPIO_Pin_0,
+        .GPIO_Pin   = GPIO_Pin_0 | GPIO_Pin_1,
         .GPIO_Speed = GPIO_Speed_50MHz,
         .GPIO_Mode  = GPIO_Mode_Out_PP
     };
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 
-    //SCL signal
+    //SCL signal and SDA signal
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
     //SDA signal
-    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_1;
-    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IPD; 
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    //GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_1;
+    //GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IPD;
+    //GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+    //vI2C_set_sda_dir(I2C_DIR_OUTPUT);
+    vI2C_set_sda(I2C_PIN_HIGH);
+    vI2C_set_scl(I2C_PIN_HIGH);
+    vI2C_ticks_delay(I2C_OP_READ_SEQ);
+    vI2C_ticks_delay(I2C_OP_READ_SEQ);
 }
 
 

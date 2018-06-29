@@ -90,50 +90,146 @@ static int prints(char **out, const char *string, int width, int pad)
 }
 
 /* the following should be enough for 32 bit int */
-#define PRINT_BUF_LEN 12
+#define PRINTI_BUF_LEN 12
 
 static int printi(char **out, int i, int b, int sg, int width, int pad, int letbase)
 {
-	char print_buf[PRINT_BUF_LEN];
-	register char *s;
-	register int t, neg = 0, pc = 0;
-	register unsigned int u = i;
-	char negchar = '-';
+    char print_buf[PRINTI_BUF_LEN];
+    register char *s;
+    register int t, neg = 0, pc = 0;
+    register unsigned int u = i;
+    char negchar = '-';
 
-	if (i == 0) {
-		print_buf[0] = '0';
-		print_buf[1] = '\0';
-		return prints (out, print_buf, width, pad);
-	}
+    if (i == 0) {
+        print_buf[0] = '0';
+        print_buf[1] = '\0';
+        return prints (out, print_buf, width, pad);
+    }
 
-	if (sg && b == 10 && i < 0) {
-		neg = 1;
-		u = -i;
-	}
+    if (sg && b == 10 && i < 0) {
+        neg = 1;
+        u = -i;
+    }
 
-	s = print_buf + PRINT_BUF_LEN-1;
-	*s = '\0';
+    s = print_buf + PRINTI_BUF_LEN-1;
+    *s = '\0';
 
-	while (u) {
-		t = u % b;
-		if( t >= 10 )
-			t += letbase - '0' - 10;
-		*--s = t + '0';
-		u /= b;
-	}
+    while (u) {
+        t = u % b;
+        if( t >= 10 )
+            t += letbase - '0' - 10;
+        *--s = t + '0';
+        u /= b;
+    }
 
-	if (neg) {
-		if( width && (pad & PAD_ZERO) ) {
-			printchar (out, &negchar, 1);
-			++pc;
-			--width;
-		}
-		else {
-			*--s = '-';
-		}
-	}
+    if (neg) {
+        if( width && (pad & PAD_ZERO) ) {
+            printchar (out, &negchar, 1);
+            ++pc;
+            --width;
+        }
+        else {
+            *--s = '-';
+        }
+    }
 
-	return pc + prints (out, s, width, pad);
+    return pc + prints (out, s, width, pad);
+}
+
+//static int printfl(char **out, double f, int b, int sg, int width, int pad, int letbase, int prec)
+//{
+//    int pc = 0;
+//    char separator = '.';
+//    int intgr = f;
+//    char buff[20] = {0};
+//
+//    if(prec == 0) {
+//        prec = 1;
+//    }
+//    else if(prec == 1) {
+//        prec = 10;
+//    }
+//    else if (prec == 2) {
+//        prec = 100;
+//    }
+//    else if (prec == 3) {
+//        prec = 1000;
+//    }
+//    else if (prec == 4) {
+//        prec = 10000;
+//    }
+//    else if (prec == 5) {
+//        prec = 100000;
+//    }
+//    else {
+//        prec = 10;
+//    }
+//
+//
+//    if(prec) {
+//        int fract = (int)(f*prec);
+//
+//        if(fract < 0) {
+//            if(intgr == 0) {
+//                pc += printchar (out, "-", 1);
+//            }
+//
+//            fract *= (-1);
+//        }
+//        fract %=  prec;
+//
+//        pc += printi (out, intgr, b, sg, width, pad, letbase);
+//        pc += printchar (out, &separator, 1);
+//        pc += printi (out, fract, b, sg, width, pad, letbase);
+//    }
+//    else {
+//        pc += printi (out, intgr, b, sg, width, pad, letbase);
+//    }
+//
+//    return pc;
+//}
+
+#define PRINTFL_BUF_LEN 20
+static int printfl(char **out, double f, int prec)
+{
+    int pc = 0, value = 0, base = 1, i = 0;
+    char separator = '.', sign = '\0';
+    char buff[PRINTFL_BUF_LEN+1] = {0};
+
+    for(i = 0; i < prec; i++) {
+        base *= 10;
+    }
+
+    value = f * base;
+    if(value < 0) {
+        sign = '-';
+        value *= (-1);
+    }
+
+    i = sizeof(buff)-1;
+    for(i -= 1; i > 0; i--, prec--) {
+        if(prec == 0) {
+            buff[i] = '.';
+        }
+        else {
+            buff[i] = '0' + (value % 10);
+            value /= 10;
+
+            if(value == 0 && prec < 0) {
+                break;
+            }
+        }
+    }
+
+    if(i > 0) {
+        if(sign) {
+            buff[--i] = sign;
+        }
+
+        pc += printchar (out, &buff[i], PRINTFL_BUF_LEN);
+    }
+
+    return pc;
 }
 
 static int print( char **out, const char *format, va_list args )
@@ -160,6 +256,15 @@ static int print( char **out, const char *format, va_list args )
 				width *= 10;
 				width += *format - '0';
 			}
+			if( *format == '.') {
+			    char prec = *(++format) - '0';
+
+			    format++;
+			    if(*format == 'f') {
+	                pc += printfl (out, va_arg( args, double ), prec);
+	                continue;
+			    }
+			}
 			if( *format == 's' ) {
 				register char *s = (char *)va_arg( args, int );
 				pc += prints (out, s?s:"(null)", width, pad);
@@ -168,6 +273,10 @@ static int print( char **out, const char *format, va_list args )
 			if( *format == 'd' ) {
 				pc += printi (out, va_arg( args, int ), 10, 1, width, pad, 'a');
 				continue;
+			}
+			if( *format == 'f' ) {
+			    pc += printfl (out, va_arg( args, double ), 1);
+			    continue;
 			}
 			if( *format == 'x' ) {
 				pc += printi (out, va_arg( args, int ), 16, 0, width, pad, 'a');
@@ -364,7 +473,7 @@ static int scan(const char* str, const char* format, va_list ap)
 	return count;
 }
 
-int scanf_(const char* format, ...)
+int scanf(const char* format, ...)
 {
 	extern int putchar(int c);
 	extern int getchar(void);
@@ -404,7 +513,7 @@ int scanf_(const char* format, ...)
 	return count;
 }
 
-int printf_(const char *format, ...)
+int printf(const char *format, ...)
 {
         va_list args;
         
@@ -412,7 +521,7 @@ int printf_(const char *format, ...)
         return print( 0, format, args );
 }
 
-int sprintf_(char *out, const char *format, ...)
+int sprintf(char *out, const char *format, ...)
 {
         va_list args;
         
@@ -420,7 +529,7 @@ int sprintf_(char *out, const char *format, ...)
         return print( &out, format, args );
 }
 
-int snprintf_( char *buf, unsigned int count, const char *format, ... )
+int snprintf( char *buf, unsigned int count, const char *format, ... )
 {
         va_list args;
         

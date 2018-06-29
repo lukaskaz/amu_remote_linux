@@ -109,8 +109,8 @@ int main(void)
 //    xTaskCreate(vSensorsServiceTask, (signed char *) "Sensors",
 //        SENSORS_SERVICE_TASK_STACK_SIZE, NULL, SENSORS_SERVICE_TASK_PRIORITY, NULL);
     
-//    xTaskCreate(vOrientSensorServiceTask, (signed char *) "Orinent sensors",
-//        ORSENSORS_SERVICE_TASK_STACK_SIZE, NULL, ORSENSORS_SERVICE_TASK_PRIORITY, NULL);
+    xTaskCreate(vOrientSensorServiceTask, (signed char *) "Orinent sensors",
+        ORSENSORS_SERVICE_TASK_STACK_SIZE, NULL, ORSENSORS_SERVICE_TASK_PRIORITY, NULL);
 
     xTaskCreate(vLcdInterfaceTask, (signed char *) "LCD",
         LCD_INTERFACE_TASK_STACK_SIZE, NULL, LCD_INTERFACE_TASK_PRIORITY, NULL);
@@ -201,7 +201,6 @@ static void prvSetupHardware(void)
     vSound_configuration();
     vLighting_configuration();
 
-    vLCD_Startup();
 
 }
 

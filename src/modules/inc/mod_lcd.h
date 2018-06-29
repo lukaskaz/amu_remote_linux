@@ -49,8 +49,6 @@ typedef struct {
 
 
 void vLcdInterfaceTask(void * pvArg);
-void vLCD_Configuration(void);
-void vLCD_Startup(void);
 
 extern xQueueHandle xQueueLcdControl;
 

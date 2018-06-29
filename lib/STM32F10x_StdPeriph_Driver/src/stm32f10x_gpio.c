@@ -214,7 +214,7 @@ void GPIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef* GPIO_InitStruct)
         else
         {
           /* Set the corresponding ODR bit */
-          if (GPIO_InitStruct->GPIO_Mode == GPIO_Mode_IPU)
+          //if (GPIO_InitStruct->GPIO_Mode == GPIO_Mode_IPU)
           {
             GPIOx->BSRR = (((uint32_t)0x01) << pinpos);
           }
@@ -292,6 +292,7 @@ void GPIO_ChgSinglePinMode(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef* GPIO_InitStruc
       GPIOx->BSRR = bsrr_reg;
       break;
     default:
+      //GPIOx->BRR = brr_reg;
       break;
   }
 
