@@ -37,6 +37,9 @@
 #define SENSORS_DIST_TIMER_FREQ     20
 #define ADC1_DR_Address    ((uint32_t)0x4001244C)
 
+#define SEN_PROX_WARN_DIST_CM       100
+#define SEN_PROX_ALERT_DIST_CM      25
+
 static void vAnalogSensors_configuration(void);
 static void vDistSensors_configuration(void);
 static void vVoltageDetector_configuration(void);
@@ -55,23 +58,11 @@ static inline void supp_ticks_delay(volatile register uint16_t ticks)
 sensorProximity_t get_front_proximity_estimation(void)
 {
     sensorProximity_t fresult = SEN_PROX_NONE;
-    uint32_t distValue = (uint32_t)distance[SENSOR_DIST_FRONT];
-    
-    if(distValue > 150 || distValue == 0) {
-        // no obstacle detected or distance to it is safe
-        // do nothing
-    }
-    else if(distValue > 100) {
-        fresult = SEN_PROX_WRN_1;
-    }
-    else if(distValue > 30) {
-        fresult = SEN_PROX_WRN_2;
-    }
-    else {
-        //acclValsFlag = true;
-        fresult = SEN_PROX_ALERT;
-    }
-    
+    int32_t front_dist_cm = get_front_distance();
+
+    if(SEN_PROX_WARN_DIST_CM < front_dist_cm) fresult = SEN_PROX_NONE;
+    else fresult = SEN_PROX_ALERT_DIST_CM < front_dist_cm ? \
+                                    SEN_PROX_WARN:SEN_PROX_ALERT;
     return fresult;
 }
 
@@ -168,69 +159,33 @@ uint8_t PWR_PVDLevelGet(void)
     return (uint8_t)((PWR->CR >> 5) & 0x07); 
 }
 
-void vCheckSupplyVoltage(FlagStatus voltageDropping)
+void vCheckSupplyVoltage(FlagStatus voltage_drop)
 {
     sensorVolatage_t supplyVoltage = (sensorVolatage_t)PWR_PVDLevelGet();
-    if(voltageDropping == SET) {
-        // PVDO is set -> voltage going down
+    if(SET == voltage_drop) { // PVDO set -> voltage going down
         switch(supplyVoltage) {
-            case SEN_VOLT_2V9:
-                PWR_PVDLevelConfig(PWR_PVDLevel_2V8);
-                break;
-            case SEN_VOLT_2V8:
-                PWR_PVDLevelConfig(PWR_PVDLevel_2V7);
-                break;
-            case SEN_VOLT_2V7:
-                PWR_PVDLevelConfig(PWR_PVDLevel_2V6);
-                break;
-            case SEN_VOLT_2V6:
-                PWR_PVDLevelConfig(PWR_PVDLevel_2V5);
-                break;
-            case SEN_VOLT_2V5:
-                PWR_PVDLevelConfig(PWR_PVDLevel_2V4);
-                break;
-            case SEN_VOLT_2V4:
-                PWR_PVDLevelConfig(PWR_PVDLevel_2V3);
-                break;
-            case SEN_VOLT_2V3:
-                PWR_PVDLevelConfig(PWR_PVDLevel_2V2);
-                break;
-            case SEN_VOLT_2V2:
-                break;
-            default: {
-                //case should not occur
-            }
+            case SEN_VOLT_2V9: PWR_PVDLevelConfig(PWR_PVDLevel_2V8); break;
+            case SEN_VOLT_2V8: PWR_PVDLevelConfig(PWR_PVDLevel_2V7); break;
+            case SEN_VOLT_2V7: PWR_PVDLevelConfig(PWR_PVDLevel_2V6); break;
+            case SEN_VOLT_2V6: PWR_PVDLevelConfig(PWR_PVDLevel_2V5); break;
+            case SEN_VOLT_2V5: PWR_PVDLevelConfig(PWR_PVDLevel_2V4); break;
+            case SEN_VOLT_2V4: PWR_PVDLevelConfig(PWR_PVDLevel_2V3); break;
+            case SEN_VOLT_2V3: PWR_PVDLevelConfig(PWR_PVDLevel_2V2); break;
+            case SEN_VOLT_2V2: // no break
+            default:  break;
         }
     }
-    else {
-        // PVDO is cleared -> voltage is going up
+    else { // PVDO cleared -> voltage is going up
         switch(supplyVoltage) {
-            case SEN_VOLT_2V9:
-                break;
-            case SEN_VOLT_2V8:
-                PWR_PVDLevelConfig(PWR_PVDLevel_2V9);
-                break;
-            case SEN_VOLT_2V7:
-                PWR_PVDLevelConfig(PWR_PVDLevel_2V8);
-                break;
-            case SEN_VOLT_2V6:
-                PWR_PVDLevelConfig(PWR_PVDLevel_2V7);
-                break;
-            case SEN_VOLT_2V5:
-                PWR_PVDLevelConfig(PWR_PVDLevel_2V6);
-                break;
-            case SEN_VOLT_2V4:
-                PWR_PVDLevelConfig(PWR_PVDLevel_2V5);
-                break;
-            case SEN_VOLT_2V3:
-                PWR_PVDLevelConfig(PWR_PVDLevel_2V4);
-                break;
-            case SEN_VOLT_2V2:
-                PWR_PVDLevelConfig(PWR_PVDLevel_2V3);
-                break;
-            default: {
-                //case should not occur
-            }
+            case SEN_VOLT_2V8: PWR_PVDLevelConfig(PWR_PVDLevel_2V9); break;
+            case SEN_VOLT_2V7: PWR_PVDLevelConfig(PWR_PVDLevel_2V8); break;
+            case SEN_VOLT_2V6: PWR_PVDLevelConfig(PWR_PVDLevel_2V7); break;
+            case SEN_VOLT_2V5: PWR_PVDLevelConfig(PWR_PVDLevel_2V6); break;
+            case SEN_VOLT_2V4: PWR_PVDLevelConfig(PWR_PVDLevel_2V5); break;
+            case SEN_VOLT_2V3: PWR_PVDLevelConfig(PWR_PVDLevel_2V4); break;
+            case SEN_VOLT_2V2: PWR_PVDLevelConfig(PWR_PVDLevel_2V3); break;
+            case SEN_VOLT_2V9: // no break
+            default: break;
         }
     }
 }

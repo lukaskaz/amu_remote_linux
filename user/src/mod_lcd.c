@@ -552,9 +552,11 @@ static void lcd_mov_display_screen(uint8_t line, uint8_t drive_dir)
         case DRIVE_OP_BACKWARD:
         case DRIVE_OP_JOY_BACKWARD: screen = mov_backward; break;
         case DRIVE_OP_LEFT:
-        case DRIVE_OP_JOY_LEFT: screen = mov_left; break;
+        case DRIVE_OP_JOY_FW_LEFT:
+        case DRIVE_OP_JOY_BW_LEFT: screen = mov_left; break;
         case DRIVE_OP_RIGHT:
-        case DRIVE_OP_JOY_RIGHT: screen = mov_right; break;
+        case DRIVE_OP_JOY_FW_RIGHT:
+        case DRIVE_OP_JOY_BW_RIGHT: screen = mov_right; break;
         case DRIVE_OP_STOPPED:
         case DRIVE_OP_JOY_STOPPED: screen = mov_stopped; break;
         default: break;
@@ -570,7 +572,8 @@ static void lcd_mov_display_state(uint8_t* __restrict state_prev)
         [DRIVE_OP_FORWARD] = "FWD",  [DRIVE_OP_BACKWARD] = "BWD",
         [DRIVE_OP_LEFT]    = "LFT",  [DRIVE_OP_RIGHT]    = "RGT",
         [DRIVE_OP_JOY_FORWARD] = "FWD", [DRIVE_OP_JOY_BACKWARD] = "BWD",
-        [DRIVE_OP_JOY_LEFT]    = "LFT", [DRIVE_OP_JOY_RIGHT]    = "RGT"
+        [DRIVE_OP_JOY_FW_LEFT]    = "LFT", [DRIVE_OP_JOY_FW_RIGHT]    = "RGT",
+        [DRIVE_OP_JOY_BW_LEFT]    = "LFT", [DRIVE_OP_JOY_BW_RIGHT]    = "RGT"
     };
     char infoTxt[8+1] = {0};
     const movement_settings_t state_curr = drive_get_status();

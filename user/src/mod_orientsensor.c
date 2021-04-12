@@ -771,35 +771,6 @@ uint8_t sensor_get_major_collision_event(void)
     return ACCL_IS_HARD_TAPPED(sensor_set_events(NULL, false));
 }
 
-//void vOrientSensorServiceTask(void * pvArg)
-//{
-//    TickType_t xLastTimePoint = 0, prev_timeslot = 0;
-//    const TickType_t interval = pdMS_TO_TICKS(ORIENT_TASK_INTERVAL_MS);
-//
-//    vOrientation_sensor_configuration();
-//    xLastTimePoint = xTaskGetTickCount();
-//    while(1) {
-//        TickType_t curr_timeslot = xTaskGetTickCount(),
-//                    timeslot_ms = pdTICKS_TO_MS(curr_timeslot-prev_timeslot);
-//        prev_timeslot = curr_timeslot;
-//
-//        gyro_get_data(timeslot_ms);
-//        accl_get_data(timeslot_ms);
-////        printf("YawX: %d, PitchY %d, RollZ: %d (%d)\n",
-////            sensor_get_yaw(), sensor_get_pitch(), sensor_get_roll(), timeslot_ms);
-//
-////            printf("Accl x/y/z -> %d / %d / %d\tevents: %#x [Collision weak/hard: %d/%d]\n",
-////                    sensor_get_tiltx(), sensor_get_tilty(), sensor_get_tiltz(),
-////                    sensor_get_events(),
-////                    sensor_get_minor_collision_event(),
-////                    sensor_get_major_collision_event());
-//
-//        vTaskDelayUntil(&xLastTimePoint, interval);
-//    }
-//}
-
-
-//auxiliary functions
 static uint32_t constrain(int32_t x, int32_t a, int32_t b)
 {
     if(x < a) return a;

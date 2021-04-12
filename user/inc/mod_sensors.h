@@ -19,8 +19,7 @@ typedef enum {
 
 typedef enum {
     SEN_PROX_NONE = 0,
-    SEN_PROX_WRN_1,
-    SEN_PROX_WRN_2,
+    SEN_PROX_WARN,
     SEN_PROX_ALERT,
 } sensorProximity_t;
 

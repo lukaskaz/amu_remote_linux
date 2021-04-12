@@ -238,12 +238,9 @@ void TIM4_IRQHandler(void)
 void PVD_IRQHandler(void)
 {
 
-    if(EXTI_GetITStatus(EXTI_Line16) == SET)
-    {
-        FlagStatus PVDO_state = RESET;
+    if(SET == EXTI_GetITStatus(EXTI_Line16)) {
         EXTI_ClearITPendingBit(EXTI_Line16);
-
-        PVDO_state = PWR_GetFlagStatus(PWR_FLAG_PVDO);
+        FlagStatus PVDO_state = PWR_GetFlagStatus(PWR_FLAG_PVDO);
         vCheckSupplyVoltage(PVDO_state);
     }
 
