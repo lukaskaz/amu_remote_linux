@@ -202,7 +202,7 @@ flash:
 
 clean:
 	rm -f $(USROBJ_DIR)/*
-	rm -f $(EXECUTABLE) $(HEX_IMAGE) $(MAP_FILE)*
+	rm -f $(EXECUTABLE) $(HEX_IMAGE)
 	rm -f $(LIBFREERTOS_OUT) $(LIBSTM32_OUT) $(ST_LIB)/src/*.o
 	rm -f $(OS_LIB)/portable/MemMang/*.o $(OS_LIB)/*.o $(OS_LIB)/portable/GCC/ARM_CM3/*.o
 	rm -f $(LIBUSB_OUT) $(LIBUSB_OBJS) $(USB_LIB)/usb_vcp/src/*.o $(USB_LIB)/usb_device/src/*.o
