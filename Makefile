@@ -210,5 +210,3 @@ clean:
 #======================================================================
 .PHONY: build rebuild clean flash strip sizes sizes_all sections flash
 
-# END OF FILE
-#%%%%%%%%%%%%
