@@ -8,7 +8,9 @@ EXTRAPARAMS='--quiet'
 
 if [ -n "$1" ]; then NODE=$1; fi
 
+echo "Trying to connect to $NODE"
 echo "Press CTRL+A+Q to exit"
+
 picocom $NODE --baud $BAUDRATE --omap $OUTPUTMAP --imap $INPUTMAP $EXTRAPARAMS
 
 
